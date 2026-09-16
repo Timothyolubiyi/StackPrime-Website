@@ -1,0 +1,23 @@
+node_modules/
+.next/
+.env
+.env.local
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+*.tfplan
+*.tfvars.local
+nginx/certbot/conf/*
+!nginx/certbot/conf/.gitkeep
+
+
+# Ignore Next.js build output
+node_modules/
+.next/
+out/
+.env
+.env.local
+*.tsbuildinfo
+next-env.d.ts
+.DS_Store

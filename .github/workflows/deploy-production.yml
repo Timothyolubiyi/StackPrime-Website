@@ -1,0 +1,50 @@
+name: Deploy — Production
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "terraform/**"
+      - "README.md"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production # configure required reviewers on this GitHub Environment for a manual gate
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy source to droplet
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.PRODUCTION_DROPLET_IP }}
+          username: deploy
+          key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          source: "."
+          target: "/opt/stackprime-marketing-site/app"
+          rm: true # clear the previous copy first, avoids stale files lingering
+          overwrite: true
+
+      - name: Build and deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.PRODUCTION_DROPLET_IP }}
+          username: deploy
+          key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          script: |
+            cd /opt/stackprime-marketing-site
+            cp -r app/docker-compose.yml app/docker app/nginx . 2>/dev/null || true
+            cd app
+            docker compose build
+            docker compose up -d
+            docker image prune -f
+
+      - name: Verify health
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.PRODUCTION_DROPLET_IP }}
+          username: deploy
+          key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          script: |
+            sleep 5
+            curl -sf https://stackprimeconsulting.com/api/health || (echo "Health check failed" && exit 1)

@@ -1,0 +1,20 @@
+# Local development only: `docker compose -f docker-compose.dev.yml up`
+# Runs the Next.js dev server with hot reload — no Nginx, no TLS, no registry
+# image (builds from local source).
+
+services:
+  marketing-site:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dev
+    container_name: stackprime-marketing-site-dev
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NODE_ENV=development
