@@ -31,7 +31,7 @@ export default function Header() {
                   onMouseEnter={() => setServicesOpen(true)}
                   onMouseLeave={() => setServicesOpen(false)}
                 >
-                  <button className="flex items-center gap-1 rounded px-4 py-2 text-med font-medium hover:bg-white/10">
+                  <button className="flex items-center gap-1 rounded px-4 py-2 text-md font-medium hover:bg-white/10">
                     {item.label}
                     <ChevronIcon />
                   </button>
@@ -47,12 +47,12 @@ export default function Header() {
                             <div className="font-serif text-base font-semibold text-navy group-hover:text-blue">
                               {s.name}
                             </div>
-                            <div className="mt-1 text-med text-muted">{s.tagline}</div>
+                            <div className="mt-1 text-md text-muted">{s.tagline}</div>
                           </Link>
                         ))}
                       </div>
                       <div className="mt-4 border-t border-gray-100 pt-4">
-                        <Link href="/services" className="text-med font-medium text-blue hover:underline">
+                        <Link href="/services" className="text-md font-medium text-blue hover:underline">
                           View all services
                         </Link>
                       </div>
@@ -69,7 +69,7 @@ export default function Header() {
                   onMouseEnter={() => setCompanyOpen(true)}
                   onMouseLeave={() => setCompanyOpen(false)}
                 >
-                  <button className="flex items-center gap-1 rounded px-4 py-2 text-med font-medium hover:bg-white/10">
+                  <button className="flex items-center gap-1 rounded px-4 py-2 text-md font-medium hover:bg-white/10">
                     {item.label}
                     <ChevronIcon />
                   </button>
@@ -79,7 +79,7 @@ export default function Header() {
                         <Link
                           key={d.href}
                           href={d.href}
-                          className="block rounded-md px-3 py-2 text-med hover:bg-navy/5"
+                          className="block rounded-md px-3 py-2 text-md hover:bg-navy/5"
                         >
                           {d.label}
                         </Link>
@@ -93,7 +93,7 @@ export default function Header() {
               <Link
                 key={item.label}
                 href={item.href}
-                className="rounded px-4 py-2 text-med font-medium hover:bg-white/10"
+                className="rounded px-4 py-2 text-md font-medium hover:bg-white/10"
               >
                 {item.label}
               </Link>
@@ -104,7 +104,7 @@ export default function Header() {
         <div className="hidden lg:block">
           <Link
             href="/get-started"
-            className="rounded-full bg-gold px-5 py-2 text-med font-semibold text-navy hover:bg-gold/90"
+            className="rounded-full bg-gold px-5 py-2 text-md font-semibold text-navy hover:bg-gold/90"
           >
             Get Started
           </Link>
@@ -134,41 +134,41 @@ export default function Header() {
 function MobileNav({ onNavigate }: { onNavigate: () => void }) {
   return (
     <div className="flex flex-col gap-1">
-      <Link href="/" onClick={onNavigate} className="py-2 text-med font-medium">
+      <Link href="/" onClick={onNavigate} className="py-2 text-md font-medium">
         Home
       </Link>
       <div className="py-2">
-        <div className="text-med font-medium text-gold">Services</div>
+        <div className="text-md font-medium text-gold">Services</div>
         <div className="mt-2 flex flex-col gap-2 pl-3">
           {serviceDomains.map((s) => (
-            <Link key={s.slug} href={`/services/${s.slug}`} onClick={onNavigate} className="text-med text-white/85">
+            <Link key={s.slug} href={`/services/${s.slug}`} onClick={onNavigate} className="text-md text-white/85">
               {s.name}
             </Link>
           ))}
         </div>
       </div>
-      <Link href="/training-academy" onClick={onNavigate} className="py-2 text-med font-medium">
+      <Link href="/training-academy" onClick={onNavigate} className="py-2 text-md font-medium">
         Training Academy
       </Link>
-      <Link href="/saas-solutions" onClick={onNavigate} className="py-2 text-med font-medium">
+      <Link href="/saas-solutions" onClick={onNavigate} className="py-2 text-md font-medium">
         SaaS Products
       </Link>
-      <Link href="/web-solutions" onClick={onNavigate} className="py-2 text-med font-medium">
+      <Link href="/web-solutions" onClick={onNavigate} className="py-2 text-md font-medium">
         Web Solutions
       </Link>
       <div className="py-2">
         <div className="text-med font-medium text-gold">Company</div>
         <div className="mt-2 flex flex-col gap-2 pl-3">
-          <Link href="/company/about" onClick={onNavigate} className="text-med text-white/85">About Us</Link>
-          <Link href="/company/careers" onClick={onNavigate} className="text-med text-white/85">Careers</Link>
-          <Link href="/company/publications" onClick={onNavigate} className="text-med text-white/85">Publications</Link>
-          <Link href="/company/contact" onClick={onNavigate} className="text-med text-white/85">Contact Us</Link>
+          <Link href="/company/about" onClick={onNavigate} className="text-md text-white/85">About Us</Link>
+          <Link href="/company/careers" onClick={onNavigate} className="text-md text-white/85">Careers</Link>
+          <Link href="/company/publications" onClick={onNavigate} className="text-md text-white/85">Publications</Link>
+          <Link href="/company/contact" onClick={onNavigate} className="text-md text-white/85">Contact Us</Link>
         </div>
       </div>
       <Link
         href="/get-started"
         onClick={onNavigate}
-        className="mt-3 inline-block rounded-full bg-gold px-5 py-2 text-center text-med font-semibold text-navy"
+        className="mt-3 inline-block rounded-full bg-gold px-5 py-2 text-center text-md font-semibold text-navy"
       >
         Get Started
       </Link>

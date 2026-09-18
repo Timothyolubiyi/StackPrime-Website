@@ -18,7 +18,7 @@ export default function HomePage() {
             alt="Global network infrastructure connecting data centers worldwide"
             fill
             priority
-            className="object-cover opacity-600"
+            className="object-cover opacity-100"
             sizes="100vw"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-navy via-navy/90 to-navy/60" />
@@ -59,7 +59,7 @@ export default function HomePage() {
       </section>
 
       {/* Four pillars */}
-      <section className="py-30">
+      <section className="py-24">
         <Container>
           <div className="max-w-2xl">
             <div className="text-sm font-semibold text-gold">What We Do</div>

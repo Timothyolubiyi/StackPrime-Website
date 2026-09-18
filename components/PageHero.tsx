@@ -17,7 +17,7 @@ export default function PageHero({
   return (
     <section className="relative overflow-hidden bg-navy text-white">
       <div className="absolute inset-0">
-        <Image src={image} alt={imageAlt} fill className="object-cover opacity-600" priority sizes="100vw" />
+        <Image src={image} alt={imageAlt} fill className="object-cover opacity-100" priority sizes="100vw" />
         <div className="absolute inset-0 bg-gradient-to-r from-navy via-navy/95 to-navy/70" />
       </div>
       <Container className="relative py-20 md:py-28">

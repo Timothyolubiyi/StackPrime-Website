@@ -66,7 +66,7 @@ export default function AboutPage() {
 
             <aside className="rounded-lg bg-navy p-6 text-white">
               <h3 className="font-serif text-lg font-semibold text-gold">At a Glance</h3>
-              <dl className="mt-4 space-y-4 text-med">
+              <dl className="mt-4 space-y-4 text-md">
                 
                 <div>
                   <dt className="font-semibold text-blue">Headquarters</dt>
@@ -93,12 +93,12 @@ export default function AboutPage() {
       <section className="bg-[#F7F8FA] py-16">
         <Container>
           <h2 className="font-serif text-2xl font-bold text-navy">Our Values</h2>
-          <div className="mt-8 grid gap-6 med:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {values.map((v) => (
               <div key={v.title}>
                 <div className="h-1 w-10 rounded bg-gold" />
                 <h3 className="mt-3 font-serif text-lg font-semibold text-navy">{v.title}</h3>
-                <p className="mt-2 text-med text-muted">{v.description}</p>
+                <p className="mt-2 text-md text-muted">{v.description}</p>
               </div>
             ))}
           </div>
@@ -140,11 +140,11 @@ export default function AboutPage() {
       <section className="py-16">
         <Container>
           <h2 className="font-serif text-2xl font-bold text-navy">Our Industry Standards & Frameworks</h2>
-          <div className="mt-6 grid gap-4 med:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {standards.map((s) => (
               <div key={s.name} className="rounded-lg border border-gray-100 p-4">
                 <div className="font-semibold text-navy">{s.name}</div>
-                <div className="mt-1 text-med text-muted">{s.detail}</div>
+                <div className="mt-1 text-md text-muted">{s.detail}</div>
               </div>
             ))}
           </div>
