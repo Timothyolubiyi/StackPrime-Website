@@ -19,7 +19,7 @@ export default function ServiceCard({ service }: { service: ServiceDomain }) {
       </div>
       <div className="p-5">
         <h3 className="font-serif text-lg font-semibold text-navy">{service.name}</h3>
-        <p className="mt-2 text-sm text-muted">{service.tagline}</p>
+        <p className="mt-2 text-med text-muted">{service.tagline}</p>
       </div>
     </Link>
   );

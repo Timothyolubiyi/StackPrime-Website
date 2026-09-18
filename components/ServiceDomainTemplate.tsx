@@ -19,13 +19,13 @@ export default function ServiceDomainTemplate({ service }: { service: ServiceDom
           <div className="grid gap-10 md:grid-cols-3">
             <div className="md:col-span-2">
               <h2 className="font-serif text-2xl font-bold text-navy">Overview</h2>
-              <p className="mt-4 text-muted">{service.description}</p>
+              <p className="mt-4 text-med text-muted">{service.description}</p>
             </div>
             <div className="rounded-lg border border-gray-100 bg-[#F7F8FA] p-6">
               <h3 className="font-serif text-lg font-semibold text-navy">What&apos;s included</h3>
               <ul className="mt-4 space-y-3">
                 {service.subServices.map((sub) => (
-                  <li key={sub.name} className="flex gap-2 text-sm text-ink">
+                  <li key={sub.name} className="flex gap-2 text-med text-ink">
                     <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-gold" />
                     {sub.name}
                   </li>

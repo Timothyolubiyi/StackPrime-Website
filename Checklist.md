@@ -10,7 +10,7 @@
 
 ### Domain Registration
 - [ ] **Purchase domain `stackprimeconsulting.com`**
-  - Register via preferred domain registrar (GoDaddy, Namecheap, etc.)
+  - Register via preferred domain registrar with WhoGoHost (GoDaddy, Namecheap, etc.)
   - Ensure DNS can be managed (will point to DigitalOcean nameservers)
   - Keep domain credentials/account access secure
   - Expected cost: ~$10-15/year

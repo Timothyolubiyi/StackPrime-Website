@@ -47,13 +47,13 @@ export default function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid gap-5 med:grid-cols-2">
         <Field label="Full name" name="name" type="text" required />
         <Field label="Email" name="email" type="email" required />
       </div>
       <Field label="Company" name="company" type="text" />
       <div>
-        <label htmlFor="message" className="block text-sm font-medium text-ink">
+        <label htmlFor="message" className="block text-med font-medium text-ink">
           How can we help?
         </label>
         <textarea
@@ -61,18 +61,18 @@ export default function ContactForm() {
           name="message"
           required
           rows={5}
-          className="mt-1 w-full rounded-md border border-gray-200 px-4 py-3 text-sm focus:border-blue focus:outline-none"
+          className="mt-1 w-full rounded-md border border-gray-200 px-4 py-3 text-med focus:border-blue focus:outline-none"
         />
       </div>
 
       {status === "error" && (
-        <p className="text-sm text-red-600">Something went wrong — please try again or email us directly.</p>
+        <p className="text-med text-red-600">Something went wrong — please try again or email us directly.</p>
       )}
 
       <button
         type="submit"
         disabled={status === "submitting"}
-        className="rounded-full bg-gold px-6 py-3 text-sm font-semibold text-navy hover:bg-gold/90 disabled:opacity-60"
+        className="rounded-full bg-gold px-6 py-3 text-med font-semibold text-navy hover:bg-gold/90 disabled:opacity-60"
       >
         {status === "submitting" ? "Sending…" : "Send Message"}
       </button>
@@ -93,7 +93,7 @@ function Field({
 }) {
   return (
     <div>
-      <label htmlFor={name} className="block text-sm font-medium text-ink">
+      <label htmlFor={name} className="block text-med font-medium text-ink">
         {label}
       </label>
       <input
@@ -101,7 +101,7 @@ function Field({
         name={name}
         type={type}
         required={required}
-        className="mt-1 w-full rounded-md border border-gray-200 px-4 py-3 text-sm focus:border-blue focus:outline-none"
+        className="mt-1 w-full rounded-md border border-gray-200 px-4 py-3 text-med focus:border-blue focus:outline-none"
       />
     </div>
   );

@@ -7,7 +7,7 @@ import { companyInfo, standards } from "@/lib/site-data";
 export const metadata: Metadata = {
   title: "About Us",
   description:
-    "StackPrime Consulting Ltd (RC 9676973) — founder story, mission, and standards alignment for our Lagos-based technology consulting and training firm.",
+    "StackPrime Consulting Ltd — founder story, mission, and standards alignment for our Lagos-based technology consulting and training firm.",
 };
 
 const values = [
@@ -23,7 +23,7 @@ export default function AboutPage() {
       <PageHero
         eyebrow="About Us"
         title="Who We Are"
-        description="A Lagos-based technology consulting and training firm, building secure, scalable, and well-connected digital infrastructure."
+        description="A technology consulting and professional training firm delivering secure, scalable, sustainable, and connected digital infrastructure."
         image="/images/office-1.jpg"
         imageAlt="StackPrime team collaborating in the office"
       />
@@ -33,8 +33,7 @@ export default function AboutPage() {
           <div className="grid gap-10 md:grid-cols-3">
             <div className="md:col-span-2">
               <p className="text-muted">
-                StackPrime Consulting Ltd is a technology consulting and professional training firm
-                ({companyInfo.rc}), focuses on helping organizations build, secure, automate, and optimize modern technology environments. We provide practical, business-focused technology solutions
+                <b>StackPrime Consulting Ltd</b> is a technology consulting and professional training firm, focuses on helping organizations build, secure, automate, and optimize modern technology environments. We provide practical, business-focused technology solutions
                  across Cloud Computing, DevOps and Automation, Cybersecurity, Networking and Telecommunications, Linux and Systems Administration, and IT Project Management. Our goal is to help
                   organizations strengthen their technology infrastructure, improve operational efficiency, reduce unnecessary complexity, and build secure and scalable platforms that can support
                    long-term growth.
@@ -67,11 +66,8 @@ export default function AboutPage() {
 
             <aside className="rounded-lg bg-navy p-6 text-white">
               <h3 className="font-serif text-lg font-semibold text-gold">At a Glance</h3>
-              <dl className="mt-4 space-y-4 text-sm">
-                <div>
-                  <dt className="font-semibold text-blue">Registration</dt>
-                  <dd className="mt-1 text-white/85">{companyInfo.rc}</dd>
-                </div>
+              <dl className="mt-4 space-y-4 text-med">
+                
                 <div>
                   <dt className="font-semibold text-blue">Headquarters</dt>
                   <dd className="mt-1 text-white/85">{companyInfo.location}</dd>
@@ -97,12 +93,12 @@ export default function AboutPage() {
       <section className="bg-[#F7F8FA] py-16">
         <Container>
           <h2 className="font-serif text-2xl font-bold text-navy">Our Values</h2>
-          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-8 grid gap-6 med:grid-cols-2 lg:grid-cols-4">
             {values.map((v) => (
               <div key={v.title}>
                 <div className="h-1 w-10 rounded bg-gold" />
                 <h3 className="mt-3 font-serif text-lg font-semibold text-navy">{v.title}</h3>
-                <p className="mt-2 text-sm text-muted">{v.description}</p>
+                <p className="mt-2 text-med text-muted">{v.description}</p>
               </div>
             ))}
           </div>
@@ -143,12 +139,12 @@ export default function AboutPage() {
 
       <section className="py-16">
         <Container>
-          <h2 className="font-serif text-2xl font-bold text-navy">Standards We Align To</h2>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <h2 className="font-serif text-2xl font-bold text-navy">Our Industry Standards & Frameworks</h2>
+          <div className="mt-6 grid gap-4 med:grid-cols-2 lg:grid-cols-3">
             {standards.map((s) => (
               <div key={s.name} className="rounded-lg border border-gray-100 p-4">
                 <div className="font-semibold text-navy">{s.name}</div>
-                <div className="mt-1 text-sm text-muted">{s.detail}</div>
+                <div className="mt-1 text-med text-muted">{s.detail}</div>
               </div>
             ))}
           </div>

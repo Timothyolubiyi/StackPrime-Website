@@ -15,11 +15,11 @@ export default function Newsletter() {
   return (
     <div className="rounded-lg bg-navy p-8 text-white">
       <h3 className="font-serif text-2xl font-semibold">Stay ahead of what&apos;s next</h3>
-      <p className="mt-2 text-sm text-white/75">
+      <p className="mt-2 text-med text-white/75">
         Occasional insights on cloud, security, and infrastructure — no spam, unsubscribe anytime.
       </p>
       {status === "submitted" ? (
-        <p className="mt-4 text-sm text-gold">Thanks — you&apos;re on the list.</p>
+        <p className="mt-4 text-med text-gold">Thanks — you&apos;re on the list.</p>
       ) : (
         <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3 sm:flex-row">
           <label htmlFor="newsletter-email" className="sr-only">
@@ -32,11 +32,11 @@ export default function Newsletter() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@company.com"
-            className="flex-1 rounded-full border-0 px-4 py-3 text-sm text-ink placeholder:text-muted"
+            className="flex-1 rounded-full border-0 px-4 py-3 text-med text-ink placeholder:text-muted"
           />
           <button
             type="submit"
-            className="rounded-full bg-gold px-6 py-3 text-sm font-semibold text-navy hover:bg-gold/90"
+            className="rounded-full bg-gold px-6 py-3 text-med font-semibold text-navy hover:bg-gold/90"
           >
             Subscribe
           </button>

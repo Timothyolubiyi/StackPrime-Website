@@ -20,7 +20,7 @@ export default function CtaButton({
   return (
     <Link
       href={href}
-      className={`inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold transition-colors ${styles[variant]}`}
+      className={`inline-flex items-center justify-center rounded-full px-6 py-3 text-med font-semibold transition-colors ${styles[variant]}`}
     >
       {children}
     </Link>

@@ -18,9 +18,9 @@ export default function ProcessSteps() {
     <div className="grid gap-6 md:grid-cols-3">
       {steps.map((step, i) => (
         <div key={step.title} className="rounded-lg border border-gray-100 bg-white p-6">
-          <div className="text-sm font-semibold text-gold">Step {i + 1}</div>
+          <div className="text-med font-semibold text-gold">Step {i + 1}</div>
           <h3 className="mt-2 font-serif text-xl font-semibold text-navy">{step.title}</h3>
-          <p className="mt-2 text-sm text-muted">{step.description}</p>
+          <p className="mt-2 text-med text-muted">{step.description}</p>
         </div>
       ))}
     </div>

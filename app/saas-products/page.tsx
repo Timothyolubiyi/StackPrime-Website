@@ -5,7 +5,7 @@ import Container from "@/components/Container";
 import CtaButton from "@/components/CtaButton";
 
 export const metadata: Metadata = {
-  title: "SaaS Products",
+  title: "SaaS Solutions",
   description:
     "SP Fast — StackPrime's enterprise Network Performance Intelligence / Internet Performance Monitoring platform, plus a growing catalog of SaaS products.",
 };
@@ -21,7 +21,7 @@ export default function SaasProductsPage() {
     <>
       <PageHero
         eyebrow="Products"
-        title="SaaS Products"
+        title="SaaS Solutions"
         description="A growing catalog of enterprise software, starting with our flagship network intelligence platform."
         image="/images/product-ui-1.jpg"
         imageAlt="SP Fast dashboard showing real-time performance monitoring"

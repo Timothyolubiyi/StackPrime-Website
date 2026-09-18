@@ -18,7 +18,7 @@ export default function HomePage() {
             alt="Global network infrastructure connecting data centers worldwide"
             fill
             priority
-            className="object-cover opacity-40"
+            className="object-cover opacity-600"
             sizes="100vw"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-navy via-navy/90 to-navy/60" />
@@ -48,7 +48,7 @@ export default function HomePage() {
       <section className="border-b border-gray-100 bg-white py-8">
         <Container>
           <div className="flex flex-wrap items-center justify-between gap-6 text-sm text-muted">
-            <div className="font-semibold text-navy">{companyInfo.rc}</div>
+            <div className="font-semibold text-navy"></div>
             <div className="flex flex-wrap gap-x-6 gap-y-2">
               {standards.map((s) => (
                 <span key={s.name}>{s.name}</span>
@@ -59,7 +59,7 @@ export default function HomePage() {
       </section>
 
       {/* Four pillars */}
-      <section className="py-20">
+      <section className="py-30">
         <Container>
           <div className="max-w-2xl">
             <div className="text-sm font-semibold text-gold">What We Do</div>
@@ -81,7 +81,7 @@ export default function HomePage() {
               cta="View Programs"
             />
             <PillarCard
-              title="SaaS Products"
+              title="SaaS Solutions"
               description="Enterprise software and web applications development, starting with SP Fast — a Network Performance Intelligence platform."
               href="/saas-products"
               cta="See Products"
