@@ -1,0 +1,58 @@
+# Deployed on the droplet at /opt/stackprime-marketing-site/docker-compose.yml.
+# Builds the app image directly on the droplet (no Container Registry) —
+# the GitHub Actions deploy workflow copies the full source here first,
+# then runs `docker compose build && docker compose up -d`.
+
+services:
+  marketing-site:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+        NEXT_PUBLIC_ASSETS_CDN_URL: ${NEXT_PUBLIC_ASSETS_CDN_URL}
+    container_name: stackprime-marketing-site
+    restart: unless-stopped
+    env_file:
+      - .env
+    expose:
+      - "3000"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: stackprime-nginx
+    restart: unless-stopped
+    depends_on:
+      - marketing-site
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/certbot/www:/var/www/certbot:ro
+      - ./nginx/certbot/conf:/etc/letsencrypt:ro
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  certbot:
+    image: certbot/certbot:latest
+    container_name: stackprime-certbot
+    restart: unless-stopped
+    volumes:
+      - ./nginx/certbot/www:/var/www/certbot
+      - ./nginx/certbot/conf:/etc/letsencrypt
+    entrypoint: >
+      /bin/sh -c "trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot; sleep 12h; done"
