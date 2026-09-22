@@ -71,10 +71,71 @@ export default function SaasProductsPage() {
             </p>
           </div>
 
-          <div className="mt-10 rounded-lg border border-gray-100 bg-[#F7F8FA] p-8 text-center">
+          <div className="mt-10 rounded-lg border border-gray-100 bg-white p-8 shadow-sm">
+            <div className="flex flex-col gap-6">
+              <div>
+                <div className="inline-block rounded-full bg-blue px-4 py-1 text-xs font-semibold text-white">
+                  FREE TO TRY
+                </div>
+                <h3 className="mt-4 font-serif text-2xl font-bold text-navy">SP VAS</h3>
+                <p className="mt-1 text-sm italic text-blue">Vulnerability Assessment</p>
+                <p className="mt-4 max-w-xl text-muted">
+                  A fast, non-intrusive vulnerability assessment of any public-facing website or IP address —
+                  TLS configuration, security headers, DNS security posture, and common exposed ports, graded
+                  and delivered as a branded PDF report in minutes.
+                </p>
+
+                <div className="relative mt-6 h-64 w-full overflow-hidden rounded-lg md:h-72">
+                  <Image
+                    src="/images/vapt-2.jpg"
+                    alt="SP VAS vulnerability assessment dashboard showing risk findings and scan progress"
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 700px"
+                  />
+                </div>
+
+                <ul className="mt-6 flex flex-wrap gap-2">
+                  {[
+                    "TLS & Certificate Analysis",
+                    "Security Headers",
+                    "DNS Security (SPF/DMARC)",
+                    "Port Exposure Check",
+                    "Branded PDF Report",
+                  ].map((tag) => (
+                    <li
+                      key={tag}
+                      className="rounded-full border border-gray-200 bg-[#F7F8FA] px-3 py-1 text-xs font-medium text-ink"
+                    >
+                      {tag}
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-4 text-sm text-muted">
+                  Free for your first 3 assessments. Upgrade to Premium for unlimited scans and deeper reporting.
+                </p>
+              </div>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <a
+                  href="/web-solutions"
+                  className="inline-flex items-center justify-center rounded-full bg-gold px-6 py-3 text-sm font-semibold text-navy hover:bg-gold/90 sm:w-auto"
+                >
+                  Run a Free Assessment
+                </a>
+                <a
+                  href="/company/contact"
+                  className="inline-flex items-center justify-center rounded-full border border-gray-200 px-6 py-3 text-sm font-semibold text-ink hover:bg-[#F7F8FA]"
+                >
+                  Ask About Premium
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 rounded-lg border border-gray-100 bg-[#F7F8FA] p-8 text-center">
             <h3 className="font-serif text-xl font-semibold text-navy">More products coming to the catalog</h3>
             <p className="mt-2 text-muted">
-              Our SaaS catalog is built to hold multiple products — future tools will appear here as they launch.
+              SP Fast Speed Test and additional tools will appear here as they launch.
             </p>
           </div>
         </Container>

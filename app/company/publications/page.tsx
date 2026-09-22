@@ -24,7 +24,7 @@ export default function PublicationsPage() {
       </section>
       <section className="py-16">
   <Container>
-    <div className="grid gap-8 md:grid-cols-2">
+    <div className="grid gap-4 md:grid-cols-3">
       {/* Book 1 */}
       <article className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
         <div className="flex justify-center bg-[#F7F8FA] p-8">
@@ -36,7 +36,7 @@ export default function PublicationsPage() {
             <img
               src="/images/cisco-cli.png"
               alt="StackPrime publication - Book 1"
-              className="h-80 w-auto object-contain transition-transform duration-300 hover:scale-105"
+              className="h-90 w-auto object-contain transition-transform duration-300 hover:scale-105"
             />
           </a>
         </div>
@@ -78,7 +78,7 @@ export default function PublicationsPage() {
             <img
               src="/images/Cybersecurity-beginners.png"
               alt="StackPrime publication - Book 2"
-              className="h-80 w-auto object-contain transition-transform duration-300 hover:scale-105"
+              className="h-90 w-auto object-contain transition-transform duration-300 hover:scale-105"
             />
           </a>
         </div>
@@ -108,7 +108,51 @@ export default function PublicationsPage() {
           </a>
         </div>
       </article>
+    
+    {/* Book 3 */}
+      <article className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+        <div className="flex justify-center bg-[#F7F8FA] p-8">
+          <a
+            href="https://selar.com/318x8549r0"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              src="/images/aws-coverpage.png"
+              alt="StackPrime publication - Book 3"
+              className="h-81 w-auto object-contain transition-transform duration-300 hover:scale-105"
+            />
+          </a>
+        </div>
+
+        <div className="p-6">
+          <p className="text-sm font-medium uppercase tracking-wider text-gold">
+            Book
+          </p>
+
+          <h2 className="mt-2 font-serif text-xl font-semibold text-navy">
+            Cloud Without Fear - A Complete Beginner's Guide to Amazon Web Services
+          </h2>
+
+          <p className="mt-3 text-muted">
+            Most AWS books are written for developers or assume you already work in IT. Cloud Without Fear was written for everyone else — the entrepreneur
+             launching a startup, the IT officer managing a small team, the student preparing for their first cloud certification, the professional switching careers.
+              This book takes you from creating your very first AWS account to building a serverless API, configuring a secure virtual network, and managing cloud costs — all without assuming prior knowledge. 
+               The cloud is not complicated — you just need the right guide.
+          </p>
+
+          <a
+            href="https://selar.com/318x8549r0"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-5 inline-flex rounded-md bg-navy px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+          >
+            Get your copy
+          </a>
+        </div>
+      </article>
     </div>
+    
 
     {/* Newsletter */}
     <div className="mt-16">
