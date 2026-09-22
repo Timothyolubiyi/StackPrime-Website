@@ -1,0 +1,5 @@
+.env
+.env.local
+dev.db
+/reports/node_modules/
+dist/

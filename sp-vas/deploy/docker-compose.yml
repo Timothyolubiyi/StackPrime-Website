@@ -1,0 +1,50 @@
+# Deployed at /opt/sp-vas/docker-compose.yml on the shared droplet.
+# Kept as its OWN compose file (not merged into the marketing site's) so it
+# can be deployed, restarted, or torn down independently — the whole point
+# of the app-by-app split. Nginx (already running for the marketing site)
+# is reused as the shared reverse proxy — see nginx/vas.conf.
+#
+# Builds directly on the droplet (no Container Registry) — matches the lean
+# $6/month setup decision already made for the marketing site. If SP VAS
+# later moves to its own droplet, this is the file that travels with it.
+
+services:
+  sp-vas:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sp-vas
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - sp-vas-data:/app/data
+      - sp-vas-reports:/app/reports
+    expose:
+      - "4001"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:4001/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - shared_nginx_net
+
+volumes:
+  sp-vas-data:
+  sp-vas-reports:
+
+networks:
+  # Joins the marketing site's Nginx container on a shared external network
+  # so Nginx can proxy to this container by name without the two
+  # docker-compose projects needing to be merged into one file. Create once:
+  # `docker network create shared_nginx_net`, and add the marketing site's
+  # nginx service to it too.
+  shared_nginx_net:
+    external: true
+

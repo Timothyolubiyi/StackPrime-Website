@@ -1,0 +1,53 @@
+name: Deploy — SP VAS
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "service/**" # only triggers on changes to the SP VAS service itself
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy source to droplet
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.PRODUCTION_DROPLET_IP }}
+          username: deploy
+          key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          source: "service,deploy/docker-compose.yml,deploy/nginx/vas.conf"
+          target: "/opt/sp-vas/app"
+          rm: true
+          overwrite: true
+
+      - name: Build and deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.PRODUCTION_DROPLET_IP }}
+          username: deploy
+          key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          script: |
+            # Copy the updated nginx conf into the marketing site's Nginx container's conf dir
+            cp /opt/sp-vas/app/deploy/nginx/vas.conf /opt/stackprime-marketing-site/nginx/conf.d/vas.conf
+            docker exec stackprime-nginx nginx -s reload || true
+
+            cd /opt/sp-vas
+            cp app/deploy/docker-compose.yml .
+            cp -r app/service ./service
+            docker compose build
+            docker compose up -d
+            docker image prune -f
+
+      - name: Verify health
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.PRODUCTION_DROPLET_IP }}
+          username: deploy
+          key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          script: |
+            sleep 5
+            curl -sf https://vas.stackprimeconsulting.com/api/health || (echo "Health check failed" && exit 1)

@@ -1,0 +1,5 @@
+domain_name = "stackprimeconsulting.com"
+subdomain   = "vas"
+
+# droplet_ipv4 and do_token supplied at apply time via -var or TF_VAR_ —
+# droplet_ipv4 comes from the marketing-site-infra Terraform output.

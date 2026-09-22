@@ -1,0 +1,28 @@
+// SQLite, not Postgres, is a deliberate choice here: SP VAS's data (usage
+// counters + assessment results) is small and doesn't need a relational
+// server process of its own. Running a second Postgres container on the
+// same 1GB shared droplet as the marketing site would add real memory
+// pressure for no real benefit at this scale. Revisit if/when SP VAS moves
+// to its own droplet.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model ToolUsage {
+  id          String   @id @default(cuid())
+  fingerprint String
+  ipAddress   String
+  target      String // the URL or IP that was assessed
+  riskGrade   String // A-F, matches the report
+  riskScore   Int
+  reportPath  String? // where the generated PDF was written, for support/debug lookup
+  createdAt   DateTime @default(now())
+
+  @@index([fingerprint, ipAddress])
+}
