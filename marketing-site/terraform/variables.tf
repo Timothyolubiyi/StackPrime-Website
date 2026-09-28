@@ -13,7 +13,7 @@ variable "region" {
 variable "droplet_size" {
   description = "DigitalOcean droplet size slug"
   type        = string
-  default     = "s-1vcpu-1gb-35gb" # ~$6/month, enough for Node.js builds
+  default     = "s-1vcpu-1gb" # ~$6/month, enough for Node.js builds
 }
 
 variable "domain_name" {
