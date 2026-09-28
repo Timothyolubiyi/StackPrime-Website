@@ -1,5 +1,5 @@
-region         = "nyc3"
-droplet_size   = "s-1vcpu-1gb"
+region         = "fra1"
+droplet_size   = "s-1vcpu-512mb-10gb"
 domain_name    = "stackprimeconsulting.com.ng"
 enable_backups = false
 

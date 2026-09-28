@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    digitalocean = {
+      source  = "digitalocean/digitalocean"
+      version = "~> 2.34"
+    }
+  }
+}
+
 resource "digitalocean_project" "this" {
   # A single shared project across environments/phases keeps everything
   # visible together in the DO dashboard. Guard against re-creating it if it

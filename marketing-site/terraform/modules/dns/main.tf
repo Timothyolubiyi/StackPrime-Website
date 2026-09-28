@@ -4,6 +4,15 @@
 # module only passes `manage_domain_resource = true` for the production
 # environment; staging looks the zone up as a data source instead.
 
+terraform {
+  required_providers {
+    digitalocean = {
+      source  = "digitalocean/digitalocean"
+      version = "~> 2.34"
+    }
+  }
+}
+
 variable "manage_domain_resource" {
   type    = bool
   default = false
