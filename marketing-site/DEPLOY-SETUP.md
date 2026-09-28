@@ -1,5 +1,7 @@
 # Production Deployment Setup
 
+**Last updated:** 2026-09-28 (Secrets injection fix applied)
+
 ## GitHub Actions Secrets Required
 
 The following secrets must be configured in your GitHub repository settings (`Settings > Secrets and variables > Actions`) for the production deployment workflow to work:
