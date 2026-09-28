@@ -27,6 +27,19 @@ jobs:
 
       - name: Build and deploy
         uses: appleboy/ssh-action@v1.2.0
+        env:
+          NEXT_PUBLIC_SITE_URL: https://stackprimeconsulting.com.ng
+          NEXT_PUBLIC_ASSETS_CDN_URL: https://cdn.stackprimeconsulting.com.ng
+          NEXT_PUBLIC_RECAPTCHA_SITE_KEY: ${{ secrets.RECAPTCHA_SITE_KEY }}
+          ZOHO_CLIENT_ID: ${{ secrets.ZOHO_CLIENT_ID }}
+          ZOHO_CLIENT_SECRET: ${{ secrets.ZOHO_CLIENT_SECRET }}
+          ZOHO_REFRESH_TOKEN: ${{ secrets.ZOHO_REFRESH_TOKEN }}
+          ZOHO_ACCOUNTS_DOMAIN: https://accounts.zoho.com
+          ZOHO_CRM_API_DOMAIN: https://www.zohoapis.com
+          ZOHO_CAMPAIGNS_LIST_KEY: ${{ secrets.ZOHO_CAMPAIGNS_LIST_KEY }}
+          ZOHO_AUTHORIZATION_CODE: ${{ secrets.ZOHO_AUTHORIZATION_CODE }}
+          ZOHO_NOTIFICATION_EMAIL: info@stackprimeconsulting.com.ng
+          RECAPTCHA_SECRET_KEY: ${{ secrets.RECAPTCHA_SECRET_KEY }}
         with:
           host: ${{ secrets.PRODUCTION_DROPLET_IP }}
           username: deploy
@@ -36,20 +49,20 @@ jobs:
             set -e
             cd /opt/stackprime-marketing-site/app
 
-            # Create .env file from secrets (GitHub Actions secrets are passed as environment variables)
+            # Create .env file from environment variables
             cat > .env << 'ENVFILE'
-            NEXT_PUBLIC_SITE_URL=https://stackprimeconsulting.com.ng
-            NEXT_PUBLIC_ASSETS_CDN_URL=https://cdn.stackprimeconsulting.com.ng
-            NEXT_PUBLIC_RECAPTCHA_SITE_KEY=${{ secrets.RECAPTCHA_SITE_KEY }}
-            ZOHO_CLIENT_ID=${{ secrets.ZOHO_CLIENT_ID }}
-            ZOHO_CLIENT_SECRET=${{ secrets.ZOHO_CLIENT_SECRET }}
-            ZOHO_REFRESH_TOKEN=${{ secrets.ZOHO_REFRESH_TOKEN }}
-            ZOHO_ACCOUNTS_DOMAIN=https://accounts.zoho.com
-            ZOHO_CRM_API_DOMAIN=https://www.zohoapis.com
-            ZOHO_CAMPAIGNS_LIST_KEY=${{ secrets.ZOHO_CAMPAIGNS_LIST_KEY }}
-            ZOHO_AUTHORIZATION_CODE=${{ secrets.ZOHO_AUTHORIZATION_CODE }}
-            ZOHO_NOTIFICATION_EMAIL=info@stackprimeconsulting.com.ng
-            RECAPTCHA_SECRET_KEY=${{ secrets.RECAPTCHA_SECRET_KEY }}
+            NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
+            NEXT_PUBLIC_ASSETS_CDN_URL=$NEXT_PUBLIC_ASSETS_CDN_URL
+            NEXT_PUBLIC_RECAPTCHA_SITE_KEY=$NEXT_PUBLIC_RECAPTCHA_SITE_KEY
+            ZOHO_CLIENT_ID=$ZOHO_CLIENT_ID
+            ZOHO_CLIENT_SECRET=$ZOHO_CLIENT_SECRET
+            ZOHO_REFRESH_TOKEN=$ZOHO_REFRESH_TOKEN
+            ZOHO_ACCOUNTS_DOMAIN=$ZOHO_ACCOUNTS_DOMAIN
+            ZOHO_CRM_API_DOMAIN=$ZOHO_CRM_API_DOMAIN
+            ZOHO_CAMPAIGNS_LIST_KEY=$ZOHO_CAMPAIGNS_LIST_KEY
+            ZOHO_AUTHORIZATION_CODE=$ZOHO_AUTHORIZATION_CODE
+            ZOHO_NOTIFICATION_EMAIL=$ZOHO_NOTIFICATION_EMAIL
+            RECAPTCHA_SECRET_KEY=$RECAPTCHA_SECRET_KEY
             ENVFILE
 
             echo "✓ Created .env file"
