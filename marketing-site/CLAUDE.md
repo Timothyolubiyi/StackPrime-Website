@@ -64,11 +64,6 @@ Both environments are provisioned by the same Terraform module with different `.
                          │  └────────────────────────┘    │
                          └─────────────────────────────┘
                                         │
-                                        ▼
-                         ┌─────────────────────────────┐
-                         │  DigitalOcean Spaces (CDN)    │
-                         │  images, static assets,       │
-                         │  publications media            │
                          └─────────────────────────────┘
 ```
 
@@ -111,7 +106,7 @@ terraform/
   variables.tf
   outputs.tf
   providers.tf
-  backend.tf         # remote state in DO Spaces
+  
 ```
 
 State is stored remotely in a dedicated DigitalOcean Spaces bucket (`stackprime-terraform-state`) rather than locally, so state isn't lost if a laptop dies and so it's consistent if more than one person ever runs Terraform.
@@ -125,7 +120,7 @@ State is stored remotely in a dedicated DigitalOcean Spaces bucket (`stackprime-
 | `DIGITALOCEAN_TOKEN` | GitHub Actions secret | Terraform, DO CLI (`doctl`) |
 | `DO_REGISTRY_TOKEN` | GitHub Actions secret | Docker image push |
 | `SSH_PRIVATE_KEY` (deploy key) | GitHub Actions secret | SSH deploy step |
-| `DO_SPACES_KEY` / `DO_SPACES_SECRET` | GitHub Actions secret + droplet `.env` | Terraform backend, app asset uploads |
+- Skip this for now | `DO_SPACES_KEY` / `DO_SPACES_SECRET` | GitHub Actions secret + droplet `.env` | Terraform backend, app asset uploads |
 | Contact form / newsletter provider API key | GitHub Actions secret + droplet `.env` | Next.js server-side form handling |
 
 No secret is ever committed. `.env.example` in this repo documents every variable name the app needs, with placeholder values only.
@@ -144,12 +139,11 @@ No secret is ever committed. `.env.example` in this repo documents every variabl
 
 | Resource | Est. cost |
 |---|---|
-| Droplet — production (s-2vcpu-2gb) | ~$18 |
-| Droplet — staging (s-1vcpu-1gb) | ~$6 |
-| DigitalOcean Spaces (250GB + CDN) | ~$5 |
-| DigitalOcean Container Registry (starter) | ~$5 |
+| Droplet — production (s-2vcpu-1gb) | ~$4 |
+- no need for now| DigitalOcean Spaces (250GB + CDN) | ~$5 |
+- no need for now| DigitalOcean Container Registry (starter) | ~$5 |
 | Domain (already owned) | $0 |
-| **Total** | **~$34/month** |
+| **Total** | **~$4/month** |
 
 Scales up when Phases 2–4 add their own droplets/managed databases; each phase's infra doc should carry its own cost line so the total stays visible.
 

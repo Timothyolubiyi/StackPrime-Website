@@ -24,11 +24,10 @@ For the architecture rationale, see `README.md`. This is the "how do I actually 
    - `STAGING_DROPLET_IP`, `PRODUCTION_DROPLET_IP` (fill in after first `terraform apply`, see step 4)
    > **Note:** Zoho and reCAPTCHA credentials (`ZOHO_CLIENT_ID`, `ZOHO_CLIENT_SECRET`, `ZOHO_REFRESH_TOKEN`, `ZOHO_CAMPAIGNS_LIST_KEY`, `RECAPTCHA_SECRET_KEY`) are runtime-only and are **not** stored as GitHub Actions secrets. Add them directly to each droplet's `/opt/stackprime-marketing-site/.env` file by hand (`ssh deploy@<droplet-ip>`) — they're never needed at Docker build time, only when the container starts.
 
-4. **Provision infrastructure** — run the "Terraform Apply (manual)" workflow from the Actions tab, choosing `staging` first, then `production`. Or locally:
+4. **Provision infrastructure** — run the "Terraform Apply (manual)" workflow from the Actions tab, choosing  `production`. Or locally:
    ```bash
    cd terraform
    terraform init
-   terraform apply -var-file=environments/staging.tfvars
    terraform apply -var-file=environments/production.tfvars
    ```
    Copy the `droplet_ip` output into the corresponding GitHub secret from step 3.
