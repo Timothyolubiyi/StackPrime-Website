@@ -3,9 +3,9 @@
 # `docker compose up -d` and after DNS has propagated (the A record must
 # already resolve to this droplet, or the ACME HTTP-01 challenge will fail).
 #
-# Usage: ./init-tls.sh stackprimeconsulting.com you@stackprimeconsulting.com
+# Usage: ./init-tls.sh stackprimeconsulting.com.ng you@stackprimeconsulting.com.ng
 # For staging:
-#   ./init-tls.sh staging.stackprimeconsulting.com you@stackprimeconsulting.com
+#   ./init-tls.sh staging.stackprimeconsulting.com.ng you@stackprimeconsulting.com.ng
 
 set -euo pipefail
 

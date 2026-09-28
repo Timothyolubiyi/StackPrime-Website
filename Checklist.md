@@ -9,7 +9,7 @@
 ## Phase 1: Pre-Deployment Setup (Infrastructure & Secrets)
 
 ### Domain Registration
-- [ ] **Purchase domain `stackprimeconsulting.com`**
+- [ ] **Purchase domain `stackprimeconsulting.com.ng`**
   - Register via preferred domain registrar with WhoGoHost (GoDaddy, Namecheap, etc.)
   - Ensure DNS can be managed (will point to DigitalOcean nameservers)
   - Keep domain credentials/account access secure
@@ -72,7 +72,7 @@ Set these in repository Settings → Secrets and Variables → Actions:
     ```hcl
     region              = "nyc3"
     droplet_size        = "s-1vcpu-1gb"  # smaller for staging
-    domain_name         = "stackprimeconsulting.com"
+    domain_name         = "stackprimeconsulting.com.ng"
     enable_backups      = false
     reserved_subdomains = ["tools", "app", "learn", "api"]
     ssh_public_key      = "ssh-ed25519 ..."  # from Step 1
@@ -113,7 +113,7 @@ Set these in repository Settings → Secrets and Variables → Actions:
 
 - [ ] **Add domain to DigitalOcean DNS**
   - DigitalOcean → Networking → Domains → Add Domain
-  - Enter `stackprimeconsulting.com`
+  - Enter `stackprimeconsulting.com.ng`
   - DigitalOcean generates nameservers (e.g., `ns1.digitalocean.com`, etc.)
 
 - [ ] **Update registrar nameservers**
@@ -123,11 +123,11 @@ Set these in repository Settings → Secrets and Variables → Actions:
 
 - [ ] **Verify DNS records created**
   - Terraform's DNS module should have created:
-    - `stackprimeconsulting.com` A record → production droplet IP
-    - `www.stackprimeconsulting.com` A record → production droplet IP
-    - `staging.stackprimeconsulting.com` A record → staging droplet IP
+    - `stackprimeconsulting.com.ng` A record → production droplet IP
+    - `www.stackprimeconsulting.com.ng` A record → production droplet IP
+    - `staging.stackprimeconsulting.com.ng` A record → staging droplet IP
     - Reserved subdomains for future phases (tools, app, learn, api)
-  - Check: `dig stackprimeconsulting.com` → should resolve within a few minutes
+  - Check: `dig stackprimeconsulting.com.ng` → should resolve within a few minutes
 
 ---
 
@@ -137,21 +137,21 @@ Set these in repository Settings → Secrets and Variables → Actions:
   ```bash
   ssh deploy@<PRODUCTION_DROPLET_IP>
   cd /opt/stackprime-marketing-site
-  ./scripts/init-tls.sh stackprimeconsulting.com info@stackprimeconsulting.com
+  ./scripts/init-tls.sh stackprimeconsulting.com.ng info@stackprimeconsulting.com.ng
   docker compose exec nginx nginx -s reload
   ```
   - Creates certificate in `nginx/certbot/conf/`
   - Nginx will serve HTTPS traffic
 
 - [ ] **Verify HTTPS works**
-  - `curl https://stackprimeconsulting.com/api/health` → should return HTTP 200
+  - `curl https://stackprimeconsulting.com.ng/api/health` → should return HTTP 200
   - Open in browser → no SSL warnings
 
 - [ ] **Issue certificate for staging (optional but recommended)**
   ```bash
   ssh deploy@<STAGING_DROPLET_IP>
   cd /opt/stackprime-marketing-site
-  ./scripts/init-tls.sh staging.stackprimeconsulting.com info@stackprimeconsulting.com
+  ./scripts/init-tls.sh staging.stackprimeconsulting.com.ng info@stackprimeconsulting.com.ng
   docker compose exec nginx nginx -s reload
   ```
 
@@ -166,7 +166,7 @@ Set these in repository Settings → Secrets and Variables → Actions:
 
 - [ ] **Set up Zoho Forms** (or use Zoho CRM's lead form)
   - Create form with fields: Name, Email, Company, Message
-  - Enable form submission notifications to `info@stackprimeconsulting.com`
+  - Enable form submission notifications to `info@stackprimeconsulting.com.ng`
 
 - [ ] **Generate Zoho OAuth credentials**
   - Register custom app in Zoho CRM (Settings → Developer Connections → Connected Apps)
@@ -177,7 +177,7 @@ Set these in repository Settings → Secrets and Variables → Actions:
 - [ ] **Implement Contact Form API route** (`app/api/contact/route.ts`)
   - [ ] Verify reCAPTCHA token server-side
   - [ ] Call Zoho CRM/Forms API to create lead
-  - [ ] Trigger email notification to `info@stackprimeconsulting.com`
+  - [ ] Trigger email notification to `info@stackprimeconsulting.com.ng`
   - [ ] Handle errors gracefully (return 400 on bad input, 500 on API failure)
 
 ### Zoho Campaigns Setup (Newsletter)
@@ -196,7 +196,7 @@ Set these in repository Settings → Secrets and Variables → Actions:
 
 ### Google reCAPTCHA v3 Setup
 - [ ] **Register site at Google reCAPTCHA Admin Console** (https://www.google.com/recaptcha/admin)
-  - Create new key for `stackprimeconsulting.com` (reCAPTCHA v3)
+  - Create new key for `stackprimeconsulting.com.ng` (reCAPTCHA v3)
   - Obtain `Site Key` (public) → set as `NEXT_PUBLIC_RECAPTCHA_SITE_KEY`
   - Obtain `Secret Key` → set as `RECAPTCHA_SECRET_KEY`
 
@@ -231,7 +231,7 @@ Set these in repository Settings → Secrets and Variables → Actions:
   - CI workflow should run (lint, type-check, build)
   - Merge → production deploy should trigger
   - Approve in GitHub environment → deploys should run
-  - Verify health check passes: `https://stackprimeconsulting.com/api/health` → 200 OK
+  - Verify health check passes: `https://stackprimeconsulting.com.ng/api/health` → 200 OK
 
 ---
 
@@ -266,8 +266,8 @@ cd /opt/stackprime-marketing-site
 
 # Create/edit .env file
 cat > .env <<'EOF'
-NEXT_PUBLIC_SITE_URL=https://staging.stackprimeconsulting.com
-NEXT_PUBLIC_ASSETS_CDN_URL=https://cdn.stackprimeconsulting.com
+NEXT_PUBLIC_SITE_URL=https://staging.stackprimeconsulting.com.ng
+NEXT_PUBLIC_ASSETS_CDN_URL=https://cdn.stackprimeconsulting.com.ng
 NEXT_PUBLIC_RECAPTCHA_SITE_KEY=<reCAPTCHA site key>
 
 ZOHO_CLIENT_ID=<Zoho client ID>
@@ -276,7 +276,7 @@ ZOHO_REFRESH_TOKEN=<Zoho refresh token>
 ZOHO_ACCOUNTS_DOMAIN=https://accounts.zoho.com
 ZOHO_CRM_API_DOMAIN=https://www.zohoapis.com
 ZOHO_CAMPAIGNS_LIST_KEY=<Zoho campaigns list ID>
-ZOHO_NOTIFICATION_EMAIL=info@stackprimeconsulting.com
+ZOHO_NOTIFICATION_EMAIL=info@stackprimeconsulting.com.ng
 
 RECAPTCHA_SECRET_KEY=<reCAPTCHA secret key>
 
@@ -298,8 +298,8 @@ ssh deploy@<PRODUCTION_DROPLET_IP>
 cd /opt/stackprime-marketing-site
 
 # Same .env setup as staging, but:
-# - NEXT_PUBLIC_SITE_URL=https://stackprimeconsulting.com
-# - NEXT_PUBLIC_ASSETS_CDN_URL=https://cdn.stackprimeconsulting.com
+# - NEXT_PUBLIC_SITE_URL=https://stackprimeconsulting.com.ng
+# - NEXT_PUBLIC_ASSETS_CDN_URL=https://cdn.stackprimeconsulting.com.ng
 # - DO_SPACES_BUCKET=stackprime-assets-production
 ```
 
@@ -308,7 +308,7 @@ cd /opt/stackprime-marketing-site
 ## Phase 9: Pre-Launch Testing
 
 ### Functional Testing
-- [ ] **Home page loads** — `https://stackprimeconsulting.com` (or staging URL)
+- [ ] **Home page loads** — `https://stackprimeconsulting.com.ng` (or staging URL)
 - [ ] **All 17 routes accessible** — no 404s:
   - Home, Services overview, 5 service pages, VAPT deep page
   - Training Academy, SaaS Products, Web Solutions
@@ -324,7 +324,7 @@ cd /opt/stackprime-marketing-site
   - Fill form with test data
   - reCAPTCHA widget loads
   - Submission goes to `/api/contact`
-  - Verify email arrives at `info@stackprimeconsulting.com` from Zoho CRM
+  - Verify email arrives at `info@stackprimeconsulting.com.ng` from Zoho CRM
 
 - [ ] **Newsletter subscribes successfully**
   - Enter email in newsletter box
@@ -349,7 +349,7 @@ cd /opt/stackprime-marketing-site
 ### Monitoring & Alerts
 - [ ] **DigitalOcean monitoring enabled**
   - Enable monitoring on both droplets (CPU, memory, disk)
-  - Set up alerts to `info@stackprimeconsulting.com`
+  - Set up alerts to `info@stackprimeconsulting.com.ng`
 
 - [ ] **Backup enabled on production**
   - Droplet → Backups → Enable
@@ -391,17 +391,17 @@ cd /opt/stackprime-marketing-site
 
 These are out of scope for Phase 1 but planned:
 
-- [ ] **Phase 2: Web Solutions Tools** (tools.stackprimeconsulting.com)
+- [ ] **Phase 2: Web Solutions Tools** (tools.stackprimeconsulting.com.ng)
   - Speed test tool (functional)
   - VAPT assessment tool (functional)
   - File scan tool (functional)
 
-- [ ] **Phase 3: SaaS Platform** (app.stackprimeconsulting.com)
+- [ ] **Phase 3: SaaS Platform** (app.stackprimeconsulting.com.ng)
   - Organization admin panel
   - Catalog & entitlements
   - Software/app downloads
 
-- [ ] **Phase 4: Training Academy Portal** (learn.stackprimeconsulting.com)
+- [ ] **Phase 4: Training Academy Portal** (learn.stackprimeconsulting.com.ng)
   - Course catalog
   - Student dashboard
   - Live/recorded course access
@@ -412,7 +412,7 @@ These are out of scope for Phase 1 but planned:
 
 | Service | Cost | Status | Notes |
 |---|---|---|---|
-| Domain (stackprimeconsulting.com) | $10–15/yr | ⚠️ Not purchased | Action needed |
+| Domain (stackprimeconsulting.com.ng) | $10–15/yr | ⚠️ Not purchased | Action needed |
 | DigitalOcean (2 droplets + Spaces) | ~$34–40/mo | Pending | After Terraform apply |
 | Zoho CRM | Free tier or ~$18/mo | Pending | Create account & register app |
 | Zoho Campaigns | Free tier or ~$10/mo | Pending | Create account & newsletter list |
@@ -425,7 +425,7 @@ These are out of scope for Phase 1 but planned:
 ## Key Contacts & Email Addresses
 
 - **General inquiries:** stackprimeconsulting@gmail.com
-- **Operations (forms/alerts/support):** info@stackprimeconsulting.com
+- **Operations (forms/alerts/support):** info@stackprimeconsulting.com.ng
 - **Deploy notifications:** Should go to operations email above
 
 ---

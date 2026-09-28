@@ -5,7 +5,7 @@ import { scanRoutes } from "./routes/scan.js";
 import { healthRoutes } from "./routes/health.js";
 
 const PORT = Number(process.env.PORT ?? 4001);
-const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS ?? "https://stackprimeconsulting.com,https://www.stackprimeconsulting.com")
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS ?? "https://stackprimeconsulting.com.ng,https://www.stackprimeconsulting.com.ng")
   .split(",")
   .map((o) => o.trim());
 

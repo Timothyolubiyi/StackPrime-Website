@@ -3,14 +3,14 @@
 # environment's domain before deploying. Run by the GitHub Actions deploy
 # workflow, not typically by hand.
 #
-# Usage: ./render-nginx-conf.sh staging.stackprimeconsulting.com
+# Usage: ./render-nginx-conf.sh staging.stackprimeconsulting.com.ng
 
 set -euo pipefail
 
 SITE_DOMAIN="${1:?Usage: render-nginx-conf.sh <domain>}"
 SRC="nginx/conf.d/stackprimeconsulting.conf"
 
-if [[ "${SITE_DOMAIN}" == "stackprimeconsulting.com" ]]; then
+if [[ "${SITE_DOMAIN}" == "stackprimeconsulting.com.ng" ]]; then
   echo "Production domain — no substitution needed."
   exit 0
 fi

@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   },
   description:
     "StackPrime Consulting Ltd (RC 9676973) — Cloud, DevOps, Cybersecurity, Networking & IT Infrastructure, and Linux Server Administration consulting and training, based in Lagos, Nigeria.",
-  metadataBase: new URL("https://stackprimeconsulting.com"),
+  metadataBase: new URL("https://stackprimeconsulting.com.ng"),
 };
 
 export default function RootLayout({

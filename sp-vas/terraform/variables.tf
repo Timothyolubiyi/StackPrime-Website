@@ -7,7 +7,7 @@ variable "do_token" {
 variable "domain_name" {
   description = "Root domain (already managed in DigitalOcean DNS by the marketing site's Terraform)"
   type        = string
-  default     = "stackprimeconsulting.com"
+  default     = "stackprimeconsulting.com.ng"
 }
 
 variable "subdomain" {

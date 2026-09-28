@@ -1,6 +1,6 @@
 # SP VAS — Vulnerability Assessment (StackPrime Consulting Ltd)
 
-The first of the two Phase 2 Web Solutions apps. Deployed independently of the marketing site and of SP Fast Speed Test, per the app-by-app split — its own Terraform state, its own deploy workflow, its own subdomain (`vas.stackprimeconsulting.com`) — while still running on the shared Phase 1 droplet and appearing to visitors as part of stackprimeconsulting.com.
+The first of the two Phase 2 Web Solutions apps. Deployed independently of the marketing site and of SP Fast Speed Test, per the app-by-app split — its own Terraform state, its own deploy workflow, its own subdomain (`vas.stackprimeconsulting.com.ng`) — while still running on the shared Phase 1 droplet and appearing to visitors as part of stackprimeconsulting.com.ng.
 
 ## What it does
 
@@ -31,7 +31,7 @@ sp-vas/
     Dockerfile
   deploy/
     docker-compose.yml    # Separate compose project, joins shared Nginx network
-    nginx/vas.conf         # Reverse proxy config for vas.stackprimeconsulting.com
+    nginx/vas.conf         # Reverse proxy config for vas.stackprimeconsulting.com.ng
   .github/workflows/
     deploy-sp-vas.yml      # Independent GitHub Actions deploy — only triggers on service/** changes
   terraform/
@@ -65,7 +65,7 @@ sp-vas/
 2. `terraform apply` this module with `droplet_ipv4` set to that droplet's IP.
 3. Manually create the shared Docker network once: `docker network create shared_nginx_net` on the droplet, and add the marketing site's `nginx` service to it (edit its `docker-compose.yml` — one line).
 4. Push to `main` — `deploy-sp-vas.yml` builds and deploys independently of the marketing site's own workflow.
-5. Issue the TLS cert for `vas.stackprimeconsulting.com` the same way Phase 1's `scripts/init-tls.sh` did for the main domain.
+5. Issue the TLS cert for `vas.stackprimeconsulting.com.ng` the same way Phase 1's `scripts/init-tls.sh` did for the main domain.
 
 ## Next: SP Fast Speed Test
 

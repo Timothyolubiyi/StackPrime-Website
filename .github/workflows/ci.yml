@@ -30,5 +30,5 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          NEXT_PUBLIC_SITE_URL: https://stackprimeconsulting.com
-          NEXT_PUBLIC_ASSETS_CDN_URL: https://cdn.stackprimeconsulting.com
+          NEXT_PUBLIC_SITE_URL: https://stackprimeconsulting.com.ng
+          NEXT_PUBLIC_ASSETS_CDN_URL: https://cdn.stackprimeconsulting.com.ng

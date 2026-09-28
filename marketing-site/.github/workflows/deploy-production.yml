@@ -47,4 +47,4 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
           script: |
             sleep 5
-            curl -sf https://stackprimeconsulting.com/api/health || (echo "Health check failed" && exit 1)
+            curl -sf https://stackprimeconsulting.com.ng/api/health || (echo "Health check failed" && exit 1)

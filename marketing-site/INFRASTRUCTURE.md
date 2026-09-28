@@ -19,12 +19,12 @@
 
 | Subdomain | Surface | Phase | Status |
 |---|---|---|---|
-| `stackprimeconsulting.com` / `www.` | Public Marketing Site | Phase 1 | **This document** |
-| `tools.stackprimeconsulting.com` | Web Solutions runtime (speedtest, VAPT scan, file scan) | Phase 2 | Reserved, not yet provisioned |
-| `app.stackprimeconsulting.com` | SaaS Platform (org admin, catalog, entitlements, downloads) | Phase 3 | Reserved, not yet provisioned |
-| `learn.stackprimeconsulting.com` | Training Academy Portal | Phase 4 | Reserved, not yet provisioned |
-| `api.stackprimeconsulting.com` | Shared/internal API gateway (if needed once Phase 3 lands) | Phase 3+ | Reserved, not yet provisioned |
-| `cdn.stackprimeconsulting.com` | DigitalOcean Spaces (static assets, images, downloadable installers) | Phase 1 (provisioned now) | **This document** |
+| `stackprimeconsulting.com.ng` / `www.` | Public Marketing Site | Phase 1 | **This document** |
+| `tools.stackprimeconsulting.com.ng` | Web Solutions runtime (speedtest, VAPT scan, file scan) | Phase 2 | Reserved, not yet provisioned |
+| `app.stackprimeconsulting.com.ng` | SaaS Platform (org admin, catalog, entitlements, downloads) | Phase 3 | Reserved, not yet provisioned |
+| `learn.stackprimeconsulting.com.ng` | Training Academy Portal | Phase 4 | Reserved, not yet provisioned |
+| `api.stackprimeconsulting.com.ng` | Shared/internal API gateway (if needed once Phase 3 lands) | Phase 3+ | Reserved, not yet provisioned |
+| `cdn.stackprimeconsulting.com.ng` | DigitalOcean Spaces (static assets, images, downloadable installers) | Phase 1 (provisioned now) | **This document** |
 
 Reserving the subdomain names now (even before building what lives on them) means Phase 1's DNS module doesn't need to change shape later — later phases add new records, they don't restructure existing ones.
 
@@ -34,8 +34,8 @@ Reserving the subdomain names now (even before building what lives on them) mean
 
 | Environment | Purpose | Droplet | Domain |
 |---|---|---|---|
-| `production` | Live public site | `stackprime-marketing-prod` | `stackprimeconsulting.com` |
-| `staging` | Pre-release review, client/partner previews | `stackprime-marketing-staging` | `staging.stackprimeconsulting.com` |
+| `production` | Live public site | `stackprime-marketing-prod` | `stackprimeconsulting.com.ng` |
+| `staging` | Pre-release review, client/partner previews | `stackprime-marketing-staging` | `staging.stackprimeconsulting.com.ng` |
 
 Both environments are provisioned by the same Terraform module with different `.tfvars` files — no duplicated code, just different input variables (droplet size, domain, environment tag).
 
@@ -46,7 +46,7 @@ Both environments are provisioned by the same Terraform module with different `.
 ```
                          ┌─────────────────────────────┐
                          │   DigitalOcean DNS (domain)  │
-                         │  stackprimeconsulting.com    │
+                         │  stackprimeconsulting.com.ng    │
                          └──────────────┬───────────────┘
                                         │  A record
                                         ▼

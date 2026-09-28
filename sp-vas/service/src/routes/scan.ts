@@ -45,7 +45,7 @@ export async function scanRoutes(app: FastifyInstance) {
       return reply.code(402).send({
         error: "limit_reached",
         message: "You've used all 3 free assessments. Upgrade to Premium for unlimited scans.",
-        upgradeUrl: "https://stackprimeconsulting.com/saas-products",
+        upgradeUrl: "https://stackprimeconsulting.com.ng/saas-products",
       });
     }
 

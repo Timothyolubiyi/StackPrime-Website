@@ -154,7 +154,7 @@ export function generateVasReportPdf(params: {
     .fillColor("#5A4200")
     .font("Helvetica")
     .text(
-      "This free assessment checks external, publicly visible signals only. A full VAPT engagement covers what this can't see — request one at stackprimeconsulting.com/company/contact.",
+      "This free assessment checks external, publicly visible signals only. A full VAPT engagement covers what this can't see — request one at stackprimeconsulting.com.ng/company/contact.",
       72,
       ctaY + 28,
       { width: 450 }

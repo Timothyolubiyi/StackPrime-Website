@@ -27,7 +27,7 @@ export async function checkHeaders(url: string, timeoutMs = 6000): Promise<Heade
       method: "GET",
       redirect: "follow",
       signal: controller.signal,
-      headers: { "User-Agent": "StackPrime-SPVAS/1.0 (+https://stackprimeconsulting.com/web-solutions)" },
+      headers: { "User-Agent": "StackPrime-SPVAS/1.0 (+https://stackprimeconsulting.com.ng/web-solutions)" },
     });
     clearTimeout(timer);
 

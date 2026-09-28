@@ -11,7 +11,7 @@ export async function checkWellKnown(baseUrl: string, timeoutMs = 4000): Promise
       const res = await fetch(new URL(path, baseUrl).toString(), {
         method: "GET",
         signal: controller.signal,
-        headers: { "User-Agent": "StackPrime-SPVAS/1.0 (+https://stackprimeconsulting.com/web-solutions)" },
+        headers: { "User-Agent": "StackPrime-SPVAS/1.0 (+https://stackprimeconsulting.com.ng/web-solutions)" },
       });
       clearTimeout(timer);
       return res.ok;

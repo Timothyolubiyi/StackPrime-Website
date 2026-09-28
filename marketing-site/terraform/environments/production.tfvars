@@ -1,6 +1,6 @@
 region         = "nyc3"
 droplet_size   = "s-1vcpu-1gb"
-domain_name    = "stackprimeconsulting.com"
+domain_name    = "stackprimeconsulting.com.ng"
 enable_backups = false
 
 reserved_subdomains = ["tools", "app", "learn", "api"]

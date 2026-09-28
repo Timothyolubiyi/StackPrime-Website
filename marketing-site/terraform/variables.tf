@@ -17,9 +17,9 @@ variable "droplet_size" {
 }
 
 variable "domain_name" {
-  description = "Root domain managed in DigitalOcean DNS (e.g. stackprimeconsulting.com)"
+  description = "Root domain managed in DigitalOcean DNS (e.g. stackprimeconsulting.com.ng)"
   type        = string
-  default     = "stackprimeconsulting.com"
+  default     = "stackprimeconsulting.com.ng"
 }
 
 variable "ssh_public_key" {

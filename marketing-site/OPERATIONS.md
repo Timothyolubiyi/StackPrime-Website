@@ -33,13 +33,13 @@ For the architecture rationale, see `README.md`. This is the "how do I actually 
    ```
    Copy the `droplet_ip` output into the corresponding GitHub secret from step 3.
 
-5. **Point DNS** — Terraform creates the DNS records automatically once the domain is added to your DigitalOcean account's DNS (Networking → Domains → add `stackprimeconsulting.com`, then update your registrar's nameservers to DigitalOcean's, if not already done).
+5. **Point DNS** — Terraform creates the DNS records automatically once the domain is added to your DigitalOcean account's DNS (Networking → Domains → add `stackprimeconsulting.com.ng`, then update your registrar's nameservers to DigitalOcean's, if not already done).
 
 6. **Issue the first TLS certificate**, on the droplet itself, after the first successful `docker compose up -d`:
    ```bash
    ssh deploy@<droplet-ip>
    cd /opt/stackprime-marketing-site
-   ./scripts/init-tls.sh stackprimeconsulting.com you@stackprimeconsulting.com
+   ./scripts/init-tls.sh stackprimeconsulting.com.ng you@stackprimeconsulting.com.ng
    docker compose exec nginx nginx -s reload
    ```
 

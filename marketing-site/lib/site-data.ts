@@ -129,10 +129,10 @@ export const companyInfo = {
   rc: "RC 9676973",
   tagline: "Secure. Scalable. Connected. Empowering Your Digital Future.",
   emailGeneral: "stackprimeconsulting@gmail.com",
-  emailOperations: "info@stackprimeconsulting.com",
+  emailOperations: "info@stackprimeconsulting.com.ng",
   phone: "+234 814 440 1544",
   location: "Lagos, Nigeria",
-  website: "www.stackprimeconsulting.com",
+  website: "www.stackprimeconsulting.com.ng",
 };
 
 export const standards = [

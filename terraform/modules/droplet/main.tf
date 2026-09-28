@@ -4,7 +4,7 @@ resource "digitalocean_project" "this" {
   # already exists by importing rather than re-declaring in later modules.
   count       = var.environment == "production" ? 1 : 0
   name        = var.project_name
-  description = "All infrastructure for stackprimeconsulting.com and related products."
+  description = "All infrastructure for stackprimeconsulting.com.ng and related products."
   purpose     = "Web Application"
   environment = "Production"
 }
