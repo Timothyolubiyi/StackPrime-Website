@@ -7,7 +7,7 @@ import CtaButton from "@/components/CtaButton";
 export const metadata: Metadata = {
   title: "SaaS Solutions",
   description:
-    "SP Fast — StackPrime's enterprise Network Performance Intelligence / Internet Performance Monitoring platform, plus a growing catalog of SaaS products.",
+    "SP Fast — StackPrime&apos;s enterprise Network Performance Intelligence / Internet Performance Monitoring platform, plus a growing catalog of SaaS products.",
 };
 
 const capabilities = [

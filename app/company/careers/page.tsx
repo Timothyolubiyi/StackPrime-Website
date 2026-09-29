@@ -6,7 +6,7 @@ import { companyInfo } from "@/lib/site-data";
 
 export const metadata: Metadata = {
   title: "Careers",
-  description: "Careers at StackPrime Consulting Ltd — open roles and what it's like to work with our team.",
+  description: "Careers at StackPrime Consulting Ltd — open roles and what i&apos;s like to work with our team.",
 };
 
 export default function CareersPage() {
@@ -38,7 +38,7 @@ export default function CareersPage() {
               <h2 className="font-serif text-2xl font-bold text-navy">Open Roles</h2>
               <p className="mt-4 text-muted">
                 We don’t have any open positions at the moment, but as StackPrime continues to grow, new opportunities will become available. 
-                If you have skills and experience that align with what we do, we’d still love to hear from you and keep your profile in consideration
+                If you have skills and experience that align with what we do, we&apos;d still love to hear from you and keep your profile in consideration
                  for future opportunities.
               </p>
               <p className="mt-4 text-sm text-muted">
