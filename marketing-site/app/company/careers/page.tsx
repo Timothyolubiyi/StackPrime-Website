@@ -15,7 +15,7 @@ export default function CareersPage() {
           
       <PageHero
         eyebrow="Careers"
-        title="Build with us"
+        title="Join and build with us"
         description="Join a growing team of technology professionals passionate about building secure, scalable,
          and innovative digital solutions. We work across cloud computing, cybersecurity, networking, web and application development, DevOps, and professional technical training—creating opportunities to solve real-world challenges, develop new skills, and make a meaningful impact."
         image="/images/careers-1.jpg"
