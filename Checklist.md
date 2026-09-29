@@ -9,17 +9,17 @@
 ## Phase 1: Pre-Deployment Setup (Infrastructure & Secrets)
 
 ### Domain Registration
-- [ ] **Purchase domain `stackprimeconsulting.com.ng`**
+- [d] **Purchase domain `stackprimeconsulting.com.ng`**
   - Register via preferred domain registrar with WhoGoHost (GoDaddy, Namecheap, etc.)
   - Ensure DNS can be managed (will point to DigitalOcean nameservers)
   - Keep domain credentials/account access secure
   - Expected cost: ~$10-15/year
 
 ### DigitalOcean Account & API Setup
-- [ ] **Create DigitalOcean account** (https://digitalocean.com)
+- [d] **Create DigitalOcean account** (https://digitalocean.com)
   - Sign up and verify email
   - Add billing method
-- [ ] **Generate DigitalOcean API token**
+- [d] **Generate DigitalOcean API token**
   - Account → Settings → API → Tokens/Keys → Generate New Token
   - Store securely (will use as `DIGITALOCEAN_TOKEN` GitHub Actions secret)
 - [ ] **Configure DigitalOcean project**
@@ -27,25 +27,25 @@
   - Default project is fine if preferred
 
 ### SSH Key for Deployment
-- [ ] **Generate SSH keypair locally** (if not already done)
+- [d] **Generate SSH keypair locally** (if not already done)
   ```bash
   ssh-keygen -t ed25519 -f deploy_key -C "stackprime-deploy"
   ```
   - `deploy_key` = private key (add to GitHub secret)
   - `deploy_key.pub` = public key (add to Terraform)
-- [ ] **Store private key securely** — never commit to git
+- [d] **Store private key securely** — never commit to git
 
 ### GitHub Actions Secrets Configuration
 Set these in repository Settings → Secrets and Variables → Actions:
 
 **Infrastructure & Deployment:**
-- [ ] `DIGITALOCEAN_TOKEN` — DigitalOcean API token (from step above)
-- [ ] `DEPLOY_SSH_PRIVATE_KEY` — private SSH key for droplet access
-- [ ] `PRODUCTION_DROPLET_IP` — populate after first `terraform apply` (see Step 2 below)
+- [d] `DIGITALOCEAN_TOKEN` — DigitalOcean API token (from step above)
+- [d] `DEPLOY_SSH_PRIVATE_KEY` — private SSH key for droplet access
+- [d] `PRODUCTION_DROPLET_IP` — populate after first `terraform apply` (see Step 2 below)
 
 **DigitalOcean Spaces (Static Assets & Terraform State):**
-- [ ] `DO_SPACES_KEY` — DigitalOcean Spaces API key
-- [ ] `DO_SPACES_SECRET` — DigitalOcean Spaces API secret
+- [no need] `DO_SPACES_KEY` — DigitalOcean Spaces API key
+- [no need] `DO_SPACES_SECRET` — DigitalOcean Spaces API secret
   - Generate at Account → Settings → API → Spaces Keys
 
 **Zoho CRM & Forms (Contact Form & Newsletter)**
@@ -57,9 +57,9 @@ Set these in repository Settings → Secrets and Variables → Actions:
   - Instead, manually add them to each droplet's `/opt/stackprime-marketing-site/.env` after deployment
 
 **Google reCAPTCHA v3:**
-- [ ] `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` — public site key (baked into build, safe to expose)
+- [d] `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` — public site key (baked into build, safe to expose)
   - Also set in GitHub Actions secret so deploy workflow can inject it
-- [ ] `RECAPTCHA_SECRET_KEY` — secret key for server-side verification
+- [d] `RECAPTCHA_SECRET_KEY` — secret key for server-side verification
   - Runtime-only secret — manually add to droplet `.env` (not a GitHub Actions secret)
 
 ---
@@ -70,8 +70,8 @@ Set these in repository Settings → Secrets and Variables → Actions:
 - [ ] **Create `terraform/environments/staging.tfvars`**
   - Copy from `production.tfvars` and adjust:
     ```hcl
-    region              = "nyc3"
-    droplet_size        = "s-1vcpu-1gb"  # smaller for staging
+    region              = "fra1"
+    droplet_size        = "1vcpu-512mb-10gb"  # smaller for staging
     domain_name         = "stackprimeconsulting.com.ng"
     enable_backups      = false
     reserved_subdomains = ["tools", "app", "learn", "api"]

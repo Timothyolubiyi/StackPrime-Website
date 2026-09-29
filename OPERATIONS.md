@@ -28,7 +28,6 @@ For the architecture rationale, see `README.md`. This is the "how do I actually 
    ```bash
    cd terraform
    terraform init
-   terraform apply -var-file=environments/staging.tfvars
    terraform apply -var-file=environments/production.tfvars
    ```
    Copy the `droplet_ip` output into the corresponding GitHub secret from step 3.

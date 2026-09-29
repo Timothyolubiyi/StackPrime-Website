@@ -7,13 +7,13 @@ variable "do_token" {
 variable "region" {
   description = "DigitalOcean region slug"
   type        = string
-  default     = "nyc3"
+  default     = "fra1"
 }
 
 variable "droplet_size" {
   description = "DigitalOcean droplet size slug"
   type        = string
-  default     = "s-1vcpu-1gb" # ~$6/month
+  default     = "1vcpu-512mb-10gb" # ~$4/month
 }
 
 variable "domain_name" {
