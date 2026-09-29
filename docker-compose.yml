@@ -11,17 +11,22 @@ services:
       args:
         NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
         NEXT_PUBLIC_ASSETS_CDN_URL: ${NEXT_PUBLIC_ASSETS_CDN_URL}
+
     container_name: stackprime-marketing-site
     restart: unless-stopped
+
     env_file:
       - .env
+
     expose:
       - "3000"
+
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:3000/api/health"]
       interval: 30s
       timeout: 5s
       retries: 3
+
     logging:
       driver: json-file
       options:
@@ -34,13 +39,16 @@ services:
     restart: unless-stopped
     depends_on:
       - marketing-site
+
     ports:
       - "80:80"
       - "443:443"
+
     volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./nginx/certbot/www:/var/www/certbot:ro
-      - ./nginx/certbot/conf:/etc/letsencrypt:ro
+      - /opt/stackprime-marketing-site/production/nginx/conf.d:/etc/nginx/conf.d:ro
+      - /opt/stackprime-marketing-site/production/nginx/certbot/www:/var/www/certbot:ro
+      - /opt/stackprime-marketing-site/production/nginx/certbot/conf:/etc/letsencrypt:ro
+
     logging:
       driver: json-file
       options:
@@ -51,8 +59,13 @@ services:
     image: certbot/certbot:latest
     container_name: stackprime-certbot
     restart: unless-stopped
+
     volumes:
-      - ./nginx/certbot/www:/var/www/certbot
-      - ./nginx/certbot/conf:/etc/letsencrypt
+      - /opt/stackprime-marketing-site/production/nginx/certbot/www:/var/www/certbot
+      - /opt/stackprime-marketing-site/production/nginx/certbot/conf:/etc/letsencrypt
+
     entrypoint: >
-      /bin/sh -c "trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot; sleep 12h; done"
+      /bin/sh -c "trap exit TERM; while :; do
+      certbot renew --webroot -w /var/www/certbot;
+      sleep 12h;
+      done"

@@ -21,9 +21,10 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
           source: "."
           target: "/opt/stackprime-marketing-site/app"
-          rm: true
           overwrite: true
-          timeout: 60s
+          port: 22
+          timeout: 30s
+          command_timeout: 10m
 
       - name: Build and deploy
         uses: appleboy/ssh-action@v1.2.0

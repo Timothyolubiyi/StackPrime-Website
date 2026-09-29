@@ -22,8 +22,10 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
           source: "."
           target: "/opt/stackprime-marketing-site/app"
-          rm: true # clear the previous copy first, avoids stale files lingering
+          port: 22
           overwrite: true
+          timeout: 30s
+          command_timeout: 10m
 
       - name: Create production environment file
         uses: appleboy/ssh-action@v1.2.0
