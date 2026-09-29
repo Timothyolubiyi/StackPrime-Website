@@ -45,7 +45,6 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
           script: |
             cd /opt/stackprime-marketing-site
-            cp -r app/docker-compose.yml app/docker app/nginx . 2>/dev/null || true
             cd app
             docker compose build
             docker compose up -d
