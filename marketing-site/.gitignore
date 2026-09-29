@@ -21,3 +21,13 @@ out/
 *.tsbuildinfo
 next-env.d.ts
 .DS_Store
+
+
+# SSH keys
+stackprime_deploy
+stackprime_deploy.pub
+*.pem
+id_ed25519
+id_ed25519.pub
+id_rsa
+id_rsa.pub
