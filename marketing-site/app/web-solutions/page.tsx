@@ -5,17 +5,17 @@ import Container from "@/components/Container";
 export const metadata: Metadata = {
   title: "Web Solutions",
   description:
-    "Try StackPrime's browser-based tools — speed test, VAPT assessment, and file scanning — free, no install required.",
+    "Try StackPrime&apos;s browser-based tools — speed test, VAPT assessment, and file scanning — free, no install required.",
 };
 
 // NOTE: these tools are Phase 2 of the build sequencing (Web Solutions runtime),
-// not yet built. This page ships now as the marketing shell; each card's CTA
+// not yet built. This page ships now as the marketing shell; each card&apos;s CTA
 // should be wired to the actual tool once its backend exists, or to a
 // "notify me" capture in the meantime.
 const tools = [
   {
     name: "Run Speed Test",
-    description: "Check your network's real-world speed and latency — the same measurement engine behind SP Fast.",
+    description: "Check your network&apos;s real-world speed and latency — the same measurement engine behind SP Fast.",
   },
   {
     name: "Run VAPT Assessment",

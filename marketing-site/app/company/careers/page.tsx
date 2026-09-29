@@ -6,7 +6,7 @@ import { companyInfo } from "@/lib/site-data";
 
 export const metadata: Metadata = {
   title: "Careers",
-  description: "Careers at StackPrime Consulting Ltd — open roles and what it's like to work with our team.",
+  description: "Careers at StackPrime Consulting Ltd — open roles and what it&apos;s like to work with our team.",
 };
 
 export default function CareersPage() {

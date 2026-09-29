@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-// NOTE: This posts to /api/contact, which doesn't exist yet — it's the next
+// NOTE: This posts to /api/contact, which doesn't exist yet — it&apos;s the next
 // piece of real backend work. That route should call the Zoho CRM/Forms API
 // to store the lead and trigger the notification email, after verifying the
 // reCAPTCHA v3 token server-side. See project notes: Zoho is the confirmed

@@ -49,7 +49,7 @@ export default function AboutPage() {
               <p className="mt-4 text-muted">
                 One of StackPrime&apos;s key strengths is the ability to approach technology from multiple interconnected perspectives. A cloud environment, for example, is not simply a collection of
                  virtual machines and storage resources. It requires appropriate network architecture, identity and access management, security controls, automation, monitoring, cost management,
-                  disaster recovery, and operational processes.Our multidisciplinary approach enables us to consider these components together, helping clients develop technology environments that 
+                  disaster recovery, and operational processes. Our multidisciplinary approach enables us to consider these components together, helping clients develop technology environments that 
                   are not only functional, but also secure, maintainable, resilient, scalable, and prepared for future requirements.
               </p>
 

@@ -131,7 +131,7 @@ export default function PublicationsPage() {
           </p>
 
           <h2 className="mt-2 font-serif text-xl font-semibold text-navy">
-            Cloud Without Fear - A Complete Beginner's Guide to Amazon Web Services
+            Cloud Without Fear - A Complete Beginner&apos;s Guide to Amazon Web Services
           </h2>
 
           <p className="mt-3 text-muted">
