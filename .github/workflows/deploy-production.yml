@@ -25,6 +25,18 @@ jobs:
           rm: true # clear the previous copy first, avoids stale files lingering
           overwrite: true
 
+      - name: Create production environment file
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.PRODUCTION_DROPLET_IP }}
+          username: deploy
+          key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          script: |
+            cat > /opt/stackprime-marketing-site/app/.env <<'EOF'
+            NEXT_PUBLIC_SITE_URL=https://stackprimeconsulting.com.ng
+            NEXT_PUBLIC_ASSETS_CDN_URL=
+            EOF
+
       - name: Build and deploy via SSH
         uses: appleboy/ssh-action@v1.2.0
         with:
