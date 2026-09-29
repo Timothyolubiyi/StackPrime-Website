@@ -135,7 +135,7 @@ export default function PublicationsPage() {
           </h2>
 
           <p className="mt-3 text-muted">
-            Most AWS books are written for developers or assume you already work in IT. Cloud Without Fear was written for everyone else — the entrepreneur
+            Most AWS books are written for developers or assume you already work in IT. Cloud Without Fear was written for everyone else&mdash; — the entrepreneur
              launching a startup, the IT officer managing a small team, the student preparing for their first cloud certification, the professional switching careers.
               This book takes you from creating your very first AWS account to building a serverless API, configuring a secure virtual network, and managing cloud costs — all without assuming prior knowledge. 
                The cloud is not complicated — you just need the right guide.
