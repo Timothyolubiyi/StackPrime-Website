@@ -72,35 +72,24 @@ jobs:
             docker image prune -f
             echo "Deploy completed at $(date)"
 
-      - name: Verify health
+      - name: Verify health (with retries)
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.PRODUCTION_DROPLET_IP }}
           username: deploy
           key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
           command_timeout: 5m
-
           script: |
             set -e
-
-            cd /opt/stackprime-marketing-site/app
-
             echo "Waiting for application to be ready..."
-
             for i in {1..30}; do
               if curl -sf https://stackprimeconsulting.com.ng/api/health >/dev/null 2>&1; then
                 echo "✓ Health check passed"
                 exit 0
               fi
-
-              echo "Attempt $i/30 — waiting..."
+              echo "  Attempt $i/30 — waiting..."
               sleep 2
             done
-
             echo "✗ Health check failed after 60 seconds"
-
-            docker compose ps
-            docker compose logs --tail=100 marketing-site
-            docker compose logs --tail=100 nginx
-
+            docker compose logs
             exit 1
