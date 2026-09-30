@@ -24,7 +24,7 @@ jobs:
           target: "/opt/stackprime-marketing-site/app"
           port: 22
           overwrite: true
-          timeout: 30s
+          timeout: 2m
           command_timeout: 10m
 
       - name: Create production environment file
