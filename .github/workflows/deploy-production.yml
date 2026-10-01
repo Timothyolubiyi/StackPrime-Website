@@ -11,6 +11,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: production # configure required reviewers on this GitHub Environment for a manual gate
+
     steps:
       - uses: actions/checkout@v4
 
@@ -34,12 +35,14 @@ jobs:
           username: deploy
           key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
           script: |
+            set -e
+
             cat > /opt/stackprime-marketing-site/app/.env <<'EOF'
             NEXT_PUBLIC_SITE_URL=https://stackprimeconsulting.com.ng
             NEXT_PUBLIC_ASSETS_CDN_URL=
             EOF
 
-      - name: Build and deploy via SSH
+      - name: Build and deploy application
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.PRODUCTION_DROPLET_IP }}
@@ -48,13 +51,60 @@ jobs:
           timeout: 60s
           command_timeout: 5m
           script: |
-            cd /opt/stackprime-marketing-site
-            cd app
-            docker compose build
-            docker compose up -d
+            set -e
+
+            cd /opt/stackprime-marketing-site/app
+
+            echo "========================================"
+            echo "Building marketing application..."
+            echo "========================================"
+
+            docker compose build marketing-site
+
+            echo "========================================"
+            echo "Deploying marketing application..."
+            echo "========================================"
+
+            docker compose up -d --no-deps marketing-site
+
+            echo "========================================"
+            echo "Waiting for application health..."
+            echo "========================================"
+
+            for i in {1..12}; do
+              STATUS=$(docker inspect --format='{{.State.Health.Status}}' stackprime-marketing-site 2>/dev/null || true)
+
+              if [ "$STATUS" = "healthy" ]; then
+                echo "Application is healthy."
+                break
+              fi
+
+              echo "Health status: ${STATUS:-starting} — waiting... ($i/12)"
+              sleep 5
+            done
+
+            STATUS=$(docker inspect --format='{{.State.Health.Status}}' stackprime-marketing-site)
+
+            if [ "$STATUS" != "healthy" ]; then
+              echo "ERROR: Application did not become healthy."
+              docker logs --tail 100 stackprime-marketing-site
+              exit 1
+            fi
+
+            echo "========================================"
+            echo "Checking public HTTPS endpoint..."
+            echo "========================================"
+
+            curl -fsS https://stackprimeconsulting.com.ng/api/health
+
+            echo
+            echo "========================================"
+            echo "Deployment successful."
+            echo "========================================"
+
             docker image prune -f
 
-      - name: Verify health (with retries)
+      - name: Verify production health
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.PRODUCTION_DROPLET_IP }}
@@ -63,14 +113,20 @@ jobs:
           timeout: 60s
           command_timeout: 5m
           script: |
-            sleep 5
-            curl -sf https://stackprimeconsulting.com.ng/api/health || (echo "Health check failed" && exit 1)
-                  echo "✓ Health check passed"
+            set -e
+
+            echo "Verifying production HTTPS endpoint..."
+
+            for i in {1..10}; do
+              if curl -fsS https://stackprimeconsulting.com.ng/api/health; then
+                echo
+                echo "✓ Production health check passed."
                 exit 0
               fi
-              echo "  Attempt $i/30 — waiting..."
-              sleep 2
+
+              echo "Attempt $i/10 failed. Waiting 3 seconds..."
+              sleep 3
             done
-            echo "✗ Health check failed after 60 seconds"
-            docker compose logs
+
+            echo "✗ Production health check failed."
             exit 1

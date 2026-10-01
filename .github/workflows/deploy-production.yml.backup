@@ -1,0 +1,76 @@
+name: Deploy — Production
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "terraform/**"
+      - "README.md"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production # configure required reviewers on this GitHub Environment for a manual gate
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy source to droplet
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.PRODUCTION_DROPLET_IP }}
+          username: deploy
+          key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          source: "."
+          target: "/opt/stackprime-marketing-site/app"
+          port: 22
+          overwrite: true
+          timeout: 120s
+          command_timeout: 10m
+
+      - name: Create production environment file
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.PRODUCTION_DROPLET_IP }}
+          username: deploy
+          key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          script: |
+            cat > /opt/stackprime-marketing-site/app/.env <<'EOF'
+            NEXT_PUBLIC_SITE_URL=https://stackprimeconsulting.com.ng
+            NEXT_PUBLIC_ASSETS_CDN_URL=
+            EOF
+
+      - name: Build and deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.PRODUCTION_DROPLET_IP }}
+          username: deploy
+          key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          timeout: 60s
+          command_timeout: 5m
+          script: |
+            cd /opt/stackprime-marketing-site
+            cd app
+            docker compose build
+            docker compose up -d
+            docker image prune -f
+
+      - name: Verify health (with retries)
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.PRODUCTION_DROPLET_IP }}
+          username: deploy
+          key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          timeout: 60s
+          command_timeout: 5m
+          script: |
+            sleep 5
+            curl -sf https://stackprimeconsulting.com.ng/api/health || (echo "Health check failed" && exit 1)
+                  echo "✓ Health check passed"
+                exit 0
+              fi
+              echo "  Attempt $i/30 — waiting..."
+              sleep 2
+            done
+            echo "✗ Health check failed after 60 seconds"
+            docker compose logs
+            exit 1

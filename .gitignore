@@ -24,3 +24,11 @@ next-env.d.ts
 
 deploy_key
 deploy_key.pub
+
+
+# Certbot / Let's Encrypt
+nginx/certbot/conf/
+nginx/certbot/www/
+
+# Docker
+docker-compose.override.yml
