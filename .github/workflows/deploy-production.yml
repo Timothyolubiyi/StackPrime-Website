@@ -24,7 +24,7 @@ jobs:
           target: "/opt/stackprime-marketing-site/app"
           port: 22
           overwrite: true
-          timeout: 2m
+          timeout: 120s
           command_timeout: 10m
 
       - name: Create production environment file
@@ -45,6 +45,8 @@ jobs:
           host: ${{ secrets.PRODUCTION_DROPLET_IP }}
           username: deploy
           key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          timeout: 60s
+          command_timeout: 5m
           script: |
             cd /opt/stackprime-marketing-site
             cd app
@@ -52,12 +54,23 @@ jobs:
             docker compose up -d
             docker image prune -f
 
-      - name: Verify health
+      - name: Verify health (with retries)
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.PRODUCTION_DROPLET_IP }}
           username: deploy
           key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          timeout: 60s
+          command_timeout: 5m
           script: |
             sleep 5
             curl -sf https://stackprimeconsulting.com.ng/api/health || (echo "Health check failed" && exit 1)
+                  echo "✓ Health check passed"
+                exit 0
+              fi
+              echo "  Attempt $i/30 — waiting..."
+              sleep 2
+            done
+            echo "✗ Health check failed after 60 seconds"
+            docker compose logs
+            exit 1
