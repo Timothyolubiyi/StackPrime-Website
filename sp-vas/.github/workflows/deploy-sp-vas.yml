@@ -4,10 +4,10 @@ on:
   push:
     branches: [main]
     paths:
-      - "service/**"
-      - "deploy/docker-compose.yml"
-      - "deploy/nginx/vas.conf"
-      - ".github/workflows/deploy-sp-vas.yml"
+      - "sp-vas/service/**"
+      - "sp-vas/deploy/docker-compose.yml"
+      - "sp-vas/deploy/nginx/vas.conf"
+      - "sp-vas/.github/workflows/deploy-sp-vas.yml"
 
 jobs:
   deploy:
@@ -24,8 +24,9 @@ jobs:
           host: ${{ secrets.PRODUCTION_DROPLET_IP }}
           username: deploy
           key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
-          source: "service,deploy/docker-compose.yml,deploy/nginx/vas.conf"
+          source: "sp-vas/service,sp-vas/deploy/docker-compose.yml,sp-vas/deploy/nginx/vas.conf"
           target: "/opt/sp-vas/app"
+          strip_components: 1
           rm: true
           overwrite: true
 
@@ -40,28 +41,26 @@ jobs:
 
             echo "=== Preparing SP VAS deployment ==="
 
-            # Ensure the shared Docker network exists.
             docker network inspect shared_nginx_net >/dev/null 2>&1 || \
               docker network create shared_nginx_net
 
-            # Ensure the production SP VAS environment file exists.
             if [ ! -f /opt/sp-vas/.env ]; then
               echo "ERROR: /opt/sp-vas/.env does not exist."
-              echo "Create the production SP VAS environment file before deployment."
               exit 1
             fi
 
-            # Update the independent SP VAS Compose project.
             cd /opt/sp-vas
 
             mkdir -p deploy
 
-            cp app/deploy/docker-compose.yml \
+            cp app/docker-compose.yml \
               /opt/sp-vas/deploy/docker-compose.yml
 
             echo "=== Validating Compose configuration ==="
 
-            docker compose -f /opt/sp-vas/deploy/docker-compose.yml config >/dev/null
+            docker compose \
+              -f /opt/sp-vas/deploy/docker-compose.yml \
+              config >/dev/null
 
             echo "=== Building SP VAS ==="
 
