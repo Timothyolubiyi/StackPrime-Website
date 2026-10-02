@@ -53,7 +53,7 @@ jobs:
 
             mkdir -p deploy
 
-            cp app/docker-compose.yml \
+            cp app/deploy/docker-compose.yml \
               /opt/sp-vas/deploy/docker-compose.yml
 
             echo "=== Validating Compose configuration ==="

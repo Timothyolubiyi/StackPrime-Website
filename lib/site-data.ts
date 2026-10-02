@@ -106,7 +106,7 @@ export const serviceDomains: ServiceDomain[] = [
     shortName: "Linux Admin",
     tagline: "Servers hardened for security, maintained for reliability, and built to stay ahead.",
     description:
-      "SWe provide Linux server setup, hardening, migration, automation, and ongoing maintenance designed for reliability, security, and operational efficiency. Our approach establishes robust infrastructure from the outset while ensuring systems remain secure, stable, and well-maintained throughout their lifecycle..",
+      "We provide Linux server setup, hardening, migration, automation, and ongoing maintenance designed for reliability, security, and operational efficiency. Our approach establishes robust infrastructure from the outset while ensuring systems remain secure, stable, and well-maintained throughout their lifecycle..",
     image: "/images/linux-server-admin.jpg",
     subServices: [
       { name: "Server Setup & Hardening" },
