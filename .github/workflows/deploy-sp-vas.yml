@@ -36,6 +36,7 @@ jobs:
           host: ${{ secrets.PRODUCTION_DROPLET_IP }}
           username: deploy
           key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          command_timeout: 10m
           script: |
             set -e
 
