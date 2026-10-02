@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
     paths-ignore:
+      - "sp-vas/**"
+      - ".github/workflows/deploy-sp-vas.yml"
       - "terraform/**"
       - "README.md"
 
