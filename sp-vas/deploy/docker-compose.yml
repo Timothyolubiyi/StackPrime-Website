@@ -1,37 +1,52 @@
-# Deployed at /opt/sp-vas/docker-compose.yml on the shared droplet.
-# Kept as its OWN compose file (not merged into the marketing site's) so it
-# can be deployed, restarted, or torn down independently — the whole point
-# of the app-by-app split. Nginx (already running for the marketing site)
-# is reused as the shared reverse proxy — see nginx/vas.conf.
+# SP VAS production Compose file.
 #
-# Builds directly on the droplet (no Container Registry) — matches the lean
-# $6/month setup decision already made for the marketing site. If SP VAS
-# later moves to its own droplet, this is the file that travels with it.
+# The Compose project is deployed independently from the marketing site.
+# Production layout on the shared Droplet:
+#
+# /opt/sp-vas/
+# ├── .env
+# ├── deploy/docker-compose.yml
+# └── app/service/
+#
+# The production .env is kept outside the Git-managed application source
+# so deployments cannot accidentally delete or overwrite it.
+#
+# SP VAS connects to the existing shared_nginx_net so the existing
+# marketing-site Nginx container can reverse-proxy to sp-vas:4001.
+
+name: sp-vas
 
 services:
   sp-vas:
     build:
-      context: .
+      context: ../app/service
       dockerfile: Dockerfile
+
     container_name: sp-vas
     restart: unless-stopped
+
     env_file:
-      - .env
+      - ../.env
+
     volumes:
       - sp-vas-data:/app/data
       - sp-vas-reports:/app/reports
+
     expose:
       - "4001"
+
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:4001/api/health"]
       interval: 30s
       timeout: 5s
       retries: 3
+
     logging:
       driver: json-file
       options:
         max-size: "10m"
         max-file: "3"
+
     networks:
       - shared_nginx_net
 
@@ -40,11 +55,5 @@ volumes:
   sp-vas-reports:
 
 networks:
-  # Joins the marketing site's Nginx container on a shared external network
-  # so Nginx can proxy to this container by name without the two
-  # docker-compose projects needing to be merged into one file. Create once:
-  # `docker network create shared_nginx_net`, and add the marketing site's
-  # nginx service to it too.
   shared_nginx_net:
     external: true
-

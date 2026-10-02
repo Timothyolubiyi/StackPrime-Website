@@ -4,16 +4,21 @@ on:
   push:
     branches: [main]
     paths:
-      - "service/**" # only triggers on changes to the SP VAS service itself
+      - "service/**"
+      - "deploy/docker-compose.yml"
+      - "deploy/nginx/vas.conf"
+      - ".github/workflows/deploy-sp-vas.yml"
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: production
-    steps:
-      - uses: actions/checkout@v4
 
-      - name: Copy source to droplet
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Copy SP VAS source to Droplet
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.PRODUCTION_DROPLET_IP }}
@@ -24,30 +29,83 @@ jobs:
           rm: true
           overwrite: true
 
-      - name: Build and deploy via SSH
+      - name: Deploy SP VAS
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.PRODUCTION_DROPLET_IP }}
           username: deploy
           key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
           script: |
-            # Copy the updated nginx conf into the marketing site's Nginx container's conf dir
-            cp /opt/sp-vas/app/deploy/nginx/vas.conf /opt/stackprime-marketing-site/nginx/conf.d/vas.conf
-            docker exec stackprime-nginx nginx -s reload || true
+            set -e
 
+            echo "=== Preparing SP VAS deployment ==="
+
+            # Ensure the shared Docker network exists.
+            docker network inspect shared_nginx_net >/dev/null 2>&1 || \
+              docker network create shared_nginx_net
+
+            # Ensure the production SP VAS environment file exists.
+            if [ ! -f /opt/sp-vas/.env ]; then
+              echo "ERROR: /opt/sp-vas/.env does not exist."
+              echo "Create the production SP VAS environment file before deployment."
+              exit 1
+            fi
+
+            # Update the independent SP VAS Compose project.
             cd /opt/sp-vas
-            cp app/deploy/docker-compose.yml .
-            cp -r app/service ./service
-            docker compose build
-            docker compose up -d
-            docker image prune -f
 
-      - name: Verify health
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.PRODUCTION_DROPLET_IP }}
-          username: deploy
-          key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
-          script: |
-            sleep 5
-            curl -sf https://vas.stackprimeconsulting.com.ng/api/health || (echo "Health check failed" && exit 1)
+            mkdir -p deploy
+
+            cp app/deploy/docker-compose.yml \
+              /opt/sp-vas/deploy/docker-compose.yml
+
+            echo "=== Validating Compose configuration ==="
+
+            docker compose -f /opt/sp-vas/deploy/docker-compose.yml config >/dev/null
+
+            echo "=== Building SP VAS ==="
+
+            docker compose \
+              -f /opt/sp-vas/deploy/docker-compose.yml \
+              build sp-vas
+
+            echo "=== Starting SP VAS ==="
+
+            docker compose \
+              -f /opt/sp-vas/deploy/docker-compose.yml \
+              up -d --no-deps sp-vas
+
+            echo "=== Waiting for SP VAS health ==="
+
+            for i in $(seq 1 30); do
+              STATUS=$(docker inspect \
+                -f '{{.State.Health.Status}}' \
+                sp-vas 2>/dev/null || true)
+
+              echo "Health status: ${STATUS}"
+
+              if [ "${STATUS}" = "healthy" ]; then
+                echo "SP VAS is healthy."
+                break
+              fi
+
+              if [ "${STATUS}" = "unhealthy" ]; then
+                echo "SP VAS became unhealthy."
+                docker logs --tail 100 sp-vas || true
+                exit 1
+              fi
+
+              sleep 5
+            done
+
+            STATUS=$(docker inspect \
+              -f '{{.State.Health.Status}}' \
+              sp-vas 2>/dev/null || true)
+
+            if [ "${STATUS}" != "healthy" ]; then
+              echo "SP VAS did not become healthy within the expected time."
+              docker logs --tail 100 sp-vas || true
+              exit 1
+            fi
+
+            echo "=== SP VAS deployment completed ==="
