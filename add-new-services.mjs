@@ -1,11 +1,120 @@
-// Central content model for site structure, so the mega-menu, footer, and
-// service pages all read from one place rather than duplicating copy.
+#!/usr/bin/env node
+/**
+ * add-new-services.mjs
+ *
+ * Adds three installation services to the StackPrime marketing site:
+ *   1. Intercom / VoIP Installation
+ *   2. Office and Home LAN/WAN Installation
+ *   3. CCTV Camera Installation
+ *
+ * Each gets its own comprehensive page (overview, image, what we deliver,
+ * how it works, who it's for) and appears automatically on the Services
+ * page, the homepage service grid, the header mega-menu, and the footer,
+ * because all of those read from lib/site-data.ts.
+ *
+ * What this script changes:
+ *   - lib/site-data.ts                     extends the ServiceDomain type (new OPTIONAL
+ *                                          fields only) and adds the three services
+ *   - components/ServiceDomainTemplate.tsx replaced with a version that renders the richer
+ *                                          sections when present. Your five existing
+ *                                          service pages render exactly as before.
+ *   - app/services/<slug>/page.tsx         three new page files
+ *   - app/services/page.tsx, app/page.tsx  two small copy edits so headings no longer say
+ *                                          "five domains"
+ *
+ * Usage (run from your marketing site's root folder, ideally with a clean
+ * git working tree so `git diff` shows exactly what changed):
+ *   node add-new-services.mjs
+ *   node add-new-services.mjs path/to/marketing-site
+ *
+ * Safe to run more than once: every step checks whether it has already
+ * been applied and skips itself if so.
+ */
 
-export type SubService = {
-  name: string;
+import fs from "node:fs";
+import path from "node:path";
+
+// ---------------------------------------------------------------------------
+// Image files. Save your attached images into public/images/ with these
+// names, or change the names here before running the script.
+// ---------------------------------------------------------------------------
+const IMAGES = {
+  intercom: "intercom-voip.jpg",
+  lan: "office-home-lan-wan.jpg",
+  cctv: "cctv-installation.jpg",
 };
 
-export type ServiceFeature = {
+const SLUGS = {
+  intercom: "intercom-voip-installation",
+  lan: "office-home-lan-wan-installation",
+  cctv: "cctv-camera-installation",
+};
+
+const root = process.argv[2] ? path.resolve(process.argv[2]) : process.cwd();
+const p = (...segments) => path.join(root, ...segments);
+
+// ---------------------------------------------------------------------------
+// Helpers (line-ending safe: works whether your files are LF or CRLF)
+// ---------------------------------------------------------------------------
+function readText(file) {
+  const raw = fs.readFileSync(file, "utf8");
+  const crlf = raw.includes("\r\n");
+  return { text: crlf ? raw.replace(/\r\n/g, "\n") : raw, crlf };
+}
+
+function writeText(file, text, crlf) {
+  fs.writeFileSync(file, crlf ? text.replace(/\n/g, "\r\n") : text, "utf8");
+}
+
+function count(text, needle) {
+  return text.split(needle).length - 1;
+}
+
+function fail(message) {
+  console.error(`\n✗ ${message}\n`);
+  process.exit(1);
+}
+
+const summary = [];
+const warnings = [];
+function record(status, message) {
+  summary.push({ status, message });
+}
+
+// ---------------------------------------------------------------------------
+// Preflight
+// ---------------------------------------------------------------------------
+const requiredFiles = [
+  p("lib", "site-data.ts"),
+  p("components", "ServiceDomainTemplate.tsx"),
+  p("app", "services", "page.tsx"),
+  p("app", "page.tsx"),
+];
+for (const file of requiredFiles) {
+  if (!fs.existsSync(file)) {
+    fail(
+      `Could not find ${path.relative(root, file)} under ${root}\n` +
+        "  Run this from your marketing site's root folder, or pass the folder path:\n" +
+        "  node add-new-services.mjs path/to/marketing-site"
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Step 1: lib/site-data.ts  (type extension + three service entries)
+// ---------------------------------------------------------------------------
+const OLD_TYPE = `export type ServiceDomain = {
+  slug: string;
+  name: string;
+  shortName: string;
+  tagline: string;
+  description: string;
+  image: string;
+  subServices: SubService[];
+  cta: { label: string; href: string };
+};`;
+
+const NEW_TYPE = `export type ServiceFeature = {
   title: string;
   description: string;
 };
@@ -29,94 +138,15 @@ export type ServiceDomain = {
   process?: ServiceFeature[];
   idealFor?: string[];
   ctaHeading?: string;
-};
+};`;
 
-export const serviceDomains: ServiceDomain[] = [
-  {
-    slug: "cloud-computing",
-    name: "Cloud Computing",
-    shortName: "Cloud",
-    tagline: "Cloud infrastructure built for where you're growing, not just where you are.",
-    description:
-      "We design, migrate, and manage secure, scalable cloud environments across AWS, Microsoft Azure, and Google Cloud Platform (GCP). Our approach integrates cost optimization, security, performance, and scalability from the outset, helping organizations build resilient cloud infrastructure that supports long-term growth and operational efficiency.",
-    image: "/images/cloud-computing.jpg",
-    subServices: [
-      { name: "Cloud Strategy & Migration" },
-      { name: "Cloud Infrastructure Management" },
-      { name: "Cloud Cost Optimization" },
-      { name: "Multi-Cloud & Hybrid Cloud Architecture" },
-      { name: "Cloud Security & Compliance" },
-    ],
-    cta: { label: "Book a Consultation", href: "/company/contact" },
-  },
-  {
-    slug: "devops-engineering",
-    name: "DevOps Engineering",
-    shortName: "DevOps",
-    tagline: "Automated pipelines and infrastructure that ship faster, with fewer surprises.",
-    description:
-      "From CI/CD pipeline design to Infrastructure as Code, we build the automation layer that lets your team deploy confidently and often — not just occasionally and carefully.",
-    image: "/images/devops-1.jpg",
-    subServices: [
-      { name: "CI/CD Pipeline Design & Implementation" },
-      { name: "Infrastructure as Code (IaC)" },
-      { name: "Containerization & Orchestration" },
-      { name: "Monitoring & Observability" },
-      { name: "Release & Deployment Automation" },
-    ],
-    cta: { label: "Book a Consultation", href: "/company/contact" },
-  },
-  {
-    slug: "cybersecurity",
-    name: "Cybersecurity",
-    shortName: "Cybersecurity",
-    tagline: "Standards-aligned security assessment, monitoring, and governance.",
-    description:
-      "Our cybersecurity practice focuses on Vulnerability Assessment and Penetration Testing (VAPT), security assessments, and risk management, aligned with industry frameworks including OWASP, NIST, ISO and CIS. We combine proactive security testing with continuous monitoring, compliance support, and actionable remediation guidance to help organizations strengthen their security posture and reduce risk.",
-    image: "/images/cybersecurity-1.jpg",
-    subServices: [
-      { name: "VAPT / Security Assessments" },
-      { name: "Security Management & Monitoring" },
-      { name: "Compliance & Governance (ISO 27001, NIST CSF)" },
-    ],
-    cta: { label: "Request a Security Assessment", href: "/services/vapt-security-assessments" },
-  },
-  {
-    slug: "networking-it-infrastructure",
-    name: "Networking & IT Infrastructure",
-    shortName: "Networking",
-    tagline: "End-to-end connectivity, from physical infrastructure to the systems that power your business.",
-    description:
-      "We design, deploy, and maintain reliable network and communications infrastructure that keeps your business connected and productive. Our services cover enterprise Wi-Fi, structured TCP/IP cabling, LAN/WAN infrastructure, intercom systems, VoIP, and unified communications, with solutions tailored to your business environment, capacity, security requirements, and future growth. From network planning and installation to configuration, testing, optimization, and ongoing support, we deliver dependable connectivity designed for performance, scalability, and secure day-to-day operations.",
-    image: "/images/networking-2.jpg",
-    subServices: [
-      { name: "Network Design & Architecture" },
-      { name: "WiFi & Wireless Networking" },
-      { name: "IT / TCP-IP Networking" },
-      { name: "Intercom Systems" },
-      { name: "VoIP & Unified Communications" },
-      { name: "Network Performance Monitoring" },
-      { name: "Network Security" },
-    ],
-    cta: { label: "Book a Consultation", href: "/company/contact" },
-  },
-  {
-    slug: "linux-server-administration",
-    name: "Linux Server Administration",
-    shortName: "Linux Admin",
-    tagline: "Servers hardened for security, maintained for reliability, and built to stay ahead.",
-    description:
-      "SWe provide Linux server setup, hardening, migration, automation, and ongoing maintenance designed for reliability, security, and operational efficiency. Our approach establishes robust infrastructure from the outset while ensuring systems remain secure, stable, and well-maintained throughout their lifecycle..",
-    image: "/images/linux-server-admin.jpg",
-    subServices: [
-      { name: "Server Setup & Hardening" },
-      { name: "Server Maintenance & Support" },
-      { name: "Migration & Automation" },
-    ],
-    cta: { label: "Book a Consultation", href: "/company/contact" },
-  },
-  {
-    slug: "intercom-voip-installation",
+const ARRAY_END_ANCHOR = `  },
+];
+
+export const mainNav`;
+
+const NEW_ENTRIES = `  {
+    slug: "${SLUGS.intercom}",
     name: "Intercom / VoIP Installation",
     shortName: "Intercom & VoIP",
     eyebrow: "Installation Services",
@@ -124,7 +154,7 @@ export const serviceDomains: ServiceDomain[] = [
       "Clear communication inside your building and beyond it — designed, installed, and tested end to end.",
     description:
       "We design and install intercom systems and VoIP phone systems for offices, estates, and commercial buildings — from cabling and handset placement to call routing and staff walkthroughs.",
-    image: "/images/intercom-voip.jpg",
+    image: "/images/${IMAGES.intercom}",
     imageAlt: "Intercom and VoIP system installation",
     overview: [
       "Reliable communication is the backbone of any working office, estate, or facility. StackPrime designs and installs intercom systems and VoIP (Voice over IP) telephony as one coordinated project, so the door station at your gate, the handset at reception, and the phone lines connecting you to customers work together instead of as separate, disconnected systems.",
@@ -203,7 +233,7 @@ export const serviceDomains: ServiceDomain[] = [
     cta: { label: "Book a Consultation", href: "/company/contact" },
   },
   {
-    slug: "office-home-lan-wan-installation",
+    slug: "${SLUGS.lan}",
     name: "Office and Home LAN/WAN Installation",
     shortName: "LAN/WAN",
     eyebrow: "Installation Services",
@@ -211,7 +241,7 @@ export const serviceDomains: ServiceDomain[] = [
       "Wired and wireless networks that are cleanly cabled, properly secured, and built to grow with you.",
     description:
       "We design and install local area networks (LAN) and wide area networks (WAN) for offices, multi-site businesses, and homes — structured cabling, switching, WiFi, and internet connectivity delivered as one tidy, documented installation.",
-    image: "/images/office-home-lan-wan.jpg",
+    image: "/images/${IMAGES.lan}",
     imageAlt: "Office and home LAN/WAN network installation",
     overview: [
       "A network is only as reliable as the cabling and configuration underneath it. StackPrime designs and installs LAN (local area network) and WAN (wide area network) infrastructure for offices and homes as one complete project: structured cabling, patch panels and racks, switching, wireless access, router and firewall setup, and internet connectivity, planned around how many people and devices actually depend on it.",
@@ -290,7 +320,7 @@ export const serviceDomains: ServiceDomain[] = [
     cta: { label: "Book a Consultation", href: "/company/contact" },
   },
   {
-    slug: "cctv-camera-installation",
+    slug: "${SLUGS.cctv}",
     name: "CCTV Camera Installation",
     shortName: "CCTV",
     eyebrow: "Installation Services",
@@ -298,7 +328,7 @@ export const serviceDomains: ServiceDomain[] = [
       "See what matters, from anywhere — CCTV designed around your premises, your power situation, and your budget.",
     description:
       "We survey, design, and install CCTV surveillance systems for offices, shops, homes, and estates — including solar-powered, SIM-connected cameras for sites with no mains power or internet — so you can rely on the footage when it counts.",
-    image: "/images/cctv-installation.jpg",
+    image: "/images/${IMAGES.cctv}",
     imageAlt: "CCTV camera installation",
     overview: [
       "An effective CCTV system starts with where the cameras go and what they need to capture, not with which box of cameras is cheapest. StackPrime begins every CCTV installation with a site survey covering entry points, blind spots, lighting conditions, and the areas that matter most to you, so camera type, power source, and storage all match the actual job — not a generic package.",
@@ -396,46 +426,311 @@ export const serviceDomains: ServiceDomain[] = [
     ctaHeading: "Ready to plan your CCTV installation?",
     cta: { label: "Book a Consultation", href: "/company/contact" },
   },
-];
+`;
 
-export const mainNav = [
-  { label: "Home", href: "/" },
-  {
-    label: "Services",
-    href: "/services",
-    megaMenu: true,
-  },
-  { label: "Training Academy", href: "/training-academy" },
-  { label: "SaaS Products", href: "/saas-products" },
-  { label: "Web Solutions", href: "/web-solutions" },
-  {
-    label: "Company",
-    href: "/company/about",
-    dropdown: [
-      { label: "About Us", href: "/company/about" },
-      { label: "Careers", href: "/company/careers" },
-      { label: "Publications", href: "/company/publications" },
-      { label: "Contact Us", href: "/company/contact" },
-    ],
-  },
-];
+{
+  const file = p("lib", "site-data.ts");
+  let { text, crlf } = readText(file);
+  let changed = false;
 
-export const companyInfo = {
-  name: "StackPrime Consulting Ltd",
-  rc: "RC 9676973",
-  tagline: "Secure. Scalable. Connected. Empowering Your Digital Future.",
-  emailGeneral: "stackprimeconsulting@gmail.com",
-  emailOperations: "info@stackprimeconsulting.com.ng",
-  phone: "+234 814 440 1544",
-  location: "Lagos, Nigeria",
-  website: "www.stackprimeconsulting.com.ng",
+  if (text.includes("export type ServiceFeature")) {
+    record("skip", "lib/site-data.ts: type already extended");
+  } else if (count(text, OLD_TYPE) === 1) {
+    text = text.replace(OLD_TYPE, NEW_TYPE);
+    changed = true;
+    record("done", "lib/site-data.ts: ServiceDomain type extended with optional fields");
+  } else {
+    fail(
+      "lib/site-data.ts: the ServiceDomain type doesn't match what this script expects.\n" +
+        "  The file may have been edited since the script was written. Nothing has been changed."
+    );
+  }
+
+  if (text.includes(`slug: "${SLUGS.intercom}"`)) {
+    record("skip", "lib/site-data.ts: the three services are already present");
+  } else if (count(text, ARRAY_END_ANCHOR) === 1) {
+    text = text.replace(ARRAY_END_ANCHOR, `  },\n${NEW_ENTRIES}];\n\nexport const mainNav`);
+    changed = true;
+    record("done", "lib/site-data.ts: added Intercom / VoIP, LAN/WAN, and CCTV services");
+  } else {
+    fail(
+      "lib/site-data.ts: couldn't find the end of the serviceDomains list.\n" +
+        "  The file may have been edited since the script was written. Nothing has been changed."
+    );
+  }
+
+  if (changed) writeText(file, text, crlf);
+}
+
+// ---------------------------------------------------------------------------
+// Step 2: components/ServiceDomainTemplate.tsx
+// ---------------------------------------------------------------------------
+const NEW_TEMPLATE = `import Image from "next/image";
+import PageHero from "./PageHero";
+import Container from "./Container";
+import CtaButton from "./CtaButton";
+import type { ServiceDomain } from "@/lib/site-data";
+
+export default function ServiceDomainTemplate({ service }: { service: ServiceDomain }) {
+  const overview = service.overview ?? [];
+  const features = service.features ?? [];
+  const steps = service.process ?? [];
+  const idealFor = service.idealFor ?? [];
+  const rich = overview.length > 0;
+
+  return (
+    <>
+      <PageHero
+        eyebrow={service.eyebrow ?? "Consulting Services"}
+        title={service.name}
+        description={service.tagline}
+        image={service.image}
+        imageAlt={service.imageAlt ?? service.name}
+      />
+
+      <section className="py-16">
+        <Container>
+          <div className="grid gap-10 md:grid-cols-3">
+            <div className="md:col-span-2">
+              <h2 className="font-serif text-2xl font-bold text-navy">Overview</h2>
+              {rich ? (
+                <>
+                  {overview.map((paragraph, i) => (
+                    <p key={i} className="mt-4 text-muted">
+                      {paragraph}
+                    </p>
+                  ))}
+                  <div className="relative mt-8 h-64 overflow-hidden rounded-lg md:h-80">
+                    <Image
+                      src={service.image}
+                      alt={service.imageAlt ?? service.name}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, 66vw"
+                    />
+                  </div>
+                </>
+              ) : (
+                <p className="mt-4 text-muted">{service.description}</p>
+              )}
+            </div>
+            <div className="h-fit rounded-lg border border-gray-100 bg-[#F7F8FA] p-6">
+              <h3 className="font-serif text-lg font-semibold text-navy">What&apos;s included</h3>
+              <ul className="mt-4 space-y-3">
+                {service.subServices.map((sub) => (
+                  <li key={sub.name} className="flex gap-2 text-sm text-ink">
+                    <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-gold" />
+                    {sub.name}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </Container>
+      </section>
+
+      {rich && features.length > 0 && (
+        <section className="bg-[#F7F8FA] py-16">
+          <Container>
+            <h2 className="font-serif text-2xl font-bold text-navy">What we deliver</h2>
+            <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {features.map((feature) => (
+                <div key={feature.title} className="rounded-lg border border-gray-100 bg-white p-6">
+                  <div className="h-1 w-10 rounded bg-gold" />
+                  <h3 className="mt-4 font-serif text-lg font-semibold text-navy">{feature.title}</h3>
+                  <p className="mt-2 text-sm text-muted">{feature.description}</p>
+                </div>
+              ))}
+            </div>
+          </Container>
+        </section>
+      )}
+
+      {rich && steps.length > 0 && (
+        <section className="py-16">
+          <Container>
+            <h2 className="font-serif text-2xl font-bold text-navy">How it works</h2>
+            <div className="mt-8 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+              {steps.map((step, i) => (
+                <div key={step.title}>
+                  <div className="text-sm font-semibold text-gold">Step {i + 1}</div>
+                  <h3 className="mt-2 font-serif text-lg font-semibold text-navy">{step.title}</h3>
+                  <p className="mt-2 text-sm text-muted">{step.description}</p>
+                </div>
+              ))}
+            </div>
+          </Container>
+        </section>
+      )}
+
+      {rich && idealFor.length > 0 && (
+        <section className="bg-[#F7F8FA] py-16">
+          <Container>
+            <h2 className="font-serif text-2xl font-bold text-navy">Who this is for</h2>
+            <ul className="mt-6 grid gap-4 md:grid-cols-2">
+              {idealFor.map((item) => (
+                <li key={item} className="flex gap-3 text-ink">
+                  <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-gold" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </Container>
+        </section>
+      )}
+
+      <section className="bg-navy py-16 text-white">
+        <Container className="flex flex-col items-center gap-6 text-center md:flex-row md:justify-between md:text-left">
+          <div>
+            <h2 className="font-serif text-2xl font-bold">
+              {service.ctaHeading ?? "Ready to talk through your " + service.shortName.toLowerCase() + " needs?"}
+            </h2>
+            <p className="mt-2 text-white/75">A scoping call is the first step — no commitment required.</p>
+          </div>
+          <CtaButton href={service.cta.href} variant="gold">
+            {service.cta.label}
+          </CtaButton>
+        </Container>
+      </section>
+    </>
+  );
+}
+`;
+
+{
+  const file = p("components", "ServiceDomainTemplate.tsx");
+  const { text } = readText(file);
+  const crlf = fs.readFileSync(file, "utf8").includes("\r\n");
+
+  if (text.includes("service.overview")) {
+    record("skip", "components/ServiceDomainTemplate.tsx: already updated");
+  } else if (text.includes("export default function ServiceDomainTemplate")) {
+    writeText(file, NEW_TEMPLATE, crlf);
+    record("done", "components/ServiceDomainTemplate.tsx: now renders the richer sections when present");
+  } else {
+    fail(
+      "components/ServiceDomainTemplate.tsx doesn't look like the original template.\n" +
+        "  Nothing else has been changed beyond lib/site-data.ts. Aborting before overwriting it."
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Step 3: three new page files
+// ---------------------------------------------------------------------------
+function pageSource(slug, componentName) {
+  return `import type { Metadata } from "next";
+import ServiceDomainTemplate from "@/components/ServiceDomainTemplate";
+import { serviceDomains } from "@/lib/site-data";
+
+const service = serviceDomains.find((s) => s.slug === "${slug}")!;
+
+export const metadata: Metadata = {
+  title: service.name,
+  description: service.description,
 };
 
-export const standards = [
-  { name: "OWASP", detail: "Web application security testing" },
-  { name: "NIST SP 800-115", detail: "Technical security assessment guide" },
-  { name: "NIST CSF", detail: "Cybersecurity risk framework" },
-  { name: "CIS Controls v8", detail: "Prioritized security safeguards" },
-  { name: "ISO/IEC 27001", detail: "Information security management" },
-  { name: "CVSS v3.1", detail: "Vulnerability severity scoring" },
+export default function ${componentName}() {
+  return <ServiceDomainTemplate service={service} />;
+}
+`;
+}
+
+const pages = [
+  [SLUGS.intercom, "IntercomVoipInstallationPage"],
+  [SLUGS.lan, "OfficeHomeLanWanInstallationPage"],
+  [SLUGS.cctv, "CctvCameraInstallationPage"],
 ];
+
+for (const [slug, componentName] of pages) {
+  const file = p("app", "services", slug, "page.tsx");
+  if (fs.existsSync(file)) {
+    record("skip", `app/services/${slug}/page.tsx: already exists`);
+  } else {
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.writeFileSync(file, pageSource(slug, componentName), "utf8");
+    record("done", `app/services/${slug}/page.tsx: created`);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Step 4: copy edits (cosmetic, non-fatal if a line has since been reworded)
+// ---------------------------------------------------------------------------
+function copyEdit(relPath, edits) {
+  const file = p(...relPath.split("/"));
+  let { text, crlf } = readText(file);
+  let changed = false;
+  for (const { from, to, label } of edits) {
+    if (text.includes(to)) {
+      record("skip", `${relPath}: ${label} already updated`);
+    } else if (count(text, from) === 1) {
+      text = text.replace(from, to);
+      changed = true;
+      record("done", `${relPath}: ${label} updated`);
+    } else {
+      warnings.push(`${relPath}: couldn't find the ${label} text to update. Reword it by hand if it still says "five".`);
+    }
+  }
+  if (changed) writeText(file, text, crlf);
+}
+
+copyEdit("app/services/page.tsx", [
+  {
+    label: "page heading",
+    from: "Consulting across five core domains",
+    to: "Consulting and installation services",
+  },
+  {
+    label: "intro sentence",
+    from: "Each domain is delivered as a standalone engagement or combined into a broader program",
+    to: "Each service is delivered as a standalone engagement or combined into a broader program",
+  },
+  {
+    label: "meta description",
+    from: "Cloud, DevOps, Cybersecurity, Networking & IT Infrastructure, and Linux Server Administration consulting services from StackPrime Consulting Ltd.",
+    to: "Cloud, DevOps, Cybersecurity, Networking & IT Infrastructure, and Linux Server Administration consulting, plus Intercom / VoIP, LAN/WAN, and CCTV installation services from StackPrime Consulting Ltd.",
+  },
+]);
+
+copyEdit("app/page.tsx", [
+  {
+    label: "services section heading",
+    from: "Five domains. One standard of delivery.",
+    to: "Consulting and installation. One standard of delivery.",
+  },
+]);
+
+// ---------------------------------------------------------------------------
+// Step 5: image check
+// ---------------------------------------------------------------------------
+const missingImages = Object.values(IMAGES).filter(
+  (name) => !fs.existsSync(p("public", "images", name))
+);
+
+// ---------------------------------------------------------------------------
+// Report
+// ---------------------------------------------------------------------------
+console.log("\nStackPrime: add installation services\n");
+for (const { status, message } of summary) {
+  console.log(`  ${status === "done" ? "✓" : "·"} ${message}${status === "skip" ? "  (skipped)" : ""}`);
+}
+
+if (warnings.length > 0) {
+  console.log("\nHeads-up:");
+  for (const w of warnings) console.log(`  ! ${w}`);
+}
+
+if (missingImages.length > 0) {
+  console.log("\nImages still needed. Save them into public/images/ with these exact names:");
+  for (const name of missingImages) console.log(`  - public/images/${name}`);
+  console.log("  Until they're added, the new pages will show a dark banner and a broken image slot.");
+} else {
+  console.log("\n✓ All three images found in public/images/");
+}
+
+console.log("\nNext steps:");
+console.log("  1. git diff                  (review exactly what changed)");
+console.log("  2. npm run dev               (then open /services and the three new pages)");
+console.log(`  3. /services/${SLUGS.intercom}`);
+console.log(`     /services/${SLUGS.lan}`);
+console.log(`     /services/${SLUGS.cctv}\n`);

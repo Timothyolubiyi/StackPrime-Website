@@ -7,7 +7,7 @@ import { serviceDomains } from "@/lib/site-data";
 export const metadata: Metadata = {
   title: "Services",
   description:
-    "Cloud, DevOps, Cybersecurity, Networking & IT Infrastructure, and Linux Server Administration consulting services from StackPrime Consulting Ltd.",
+    "Cloud, DevOps, Cybersecurity, Networking & IT Infrastructure, and Linux Server Administration consulting, plus Intercom / VoIP, LAN/WAN, and CCTV installation services from StackPrime Consulting Ltd.",
 };
 
 export default function ServicesPage() {
@@ -17,7 +17,7 @@ export default function ServicesPage() {
         <Container>
           <div className="text-sm font-semibold text-gold">Services</div>
           <h1 className="mt-2 max-w-2xl font-serif text-4xl font-bold md:text-5xl">
-            Consulting across five core domains
+            Consulting and installation services
           </h1>
           <p className="mt-4 max-w-2xl text-white/85">
             Expert consulting across five core technology domains, delivered as standalone engagements or integrated programs tailored to your organization’s needs, infrastructure, and growth objectives.
