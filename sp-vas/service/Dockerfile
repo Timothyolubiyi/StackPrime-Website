@@ -11,7 +11,7 @@ FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN node node_modules/prisma/build/index.js generate
-RUN npm run build
+RUN node node_modules/typescript/bin/tsc
 
 FROM base AS runner
 ENV NODE_ENV=production
