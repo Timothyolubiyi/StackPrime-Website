@@ -7,7 +7,7 @@ on:
       - "sp-vas/service/**"
       - "sp-vas/deploy/docker-compose.yml"
       - "sp-vas/deploy/nginx/vas.conf"
-      - "sp-vas/.github/workflows/deploy-sp-vas.yml"
+      - ".github/workflows/deploy-sp-vas.yml"
 
 jobs:
   deploy:
