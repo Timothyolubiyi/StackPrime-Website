@@ -13,9 +13,10 @@ export default function ServiceCard({ service }: { service: ServiceDomain }) {
           src={service.image}
           alt={service.name}
           fill
+          unoptimized
           className="object-cover transition-transform duration-300 group-hover:scale-105"
           sizes="(max-width: 768px) 100vw, 33vw"
-        />
+          />
       </div>
       <div className="p-5">
         <h3 className="font-serif text-lg font-semibold text-navy">{service.name}</h3>

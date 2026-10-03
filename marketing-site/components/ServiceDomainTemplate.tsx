@@ -54,7 +54,7 @@ export default function ServiceDomainTemplate({
         </Container>
       </section>
 
-      {service.features?.length > 0 && (
+      {service.features && service.features.length > 0 && (
         <section className="bg-[#F7F8FA] py-16">
           <Container>
             <h2 className="font-serif text-3xl font-bold text-navy">
@@ -81,7 +81,7 @@ export default function ServiceDomainTemplate({
         </section>
       )}
 
-      {service.process?.length > 0 && (
+      {service.process && service.process.length > 0 && (
         <section className="py-16">
           <Container>
             <h2 className="font-serif text-3xl font-bold text-navy">
@@ -112,7 +112,7 @@ export default function ServiceDomainTemplate({
         </section>
       )}
 
-      {service.idealFor?.length > 0 && (
+      {service.idealFor && service.idealFor.length > 0 && (
         <section className="bg-[#F7F8FA] py-16">
           <Container>
             <h2 className="font-serif text-3xl font-bold text-navy">
