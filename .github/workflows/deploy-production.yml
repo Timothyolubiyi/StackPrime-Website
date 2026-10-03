@@ -12,18 +12,35 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Copy source to droplet
+      - name: Prepare deployment bundle
+        shell: bash
+        run: |
+          set -e
+
+          rm -rf .deploy
+          mkdir -p .deploy/docker
+
+          cp -a docker/Dockerfile .deploy/docker/
+          cp -a docker-compose.yml .deploy/
+          cp -a marketing-site .deploy/
+
+          echo "===== Deployment bundle ====="
+          du -sh .deploy
+          find .deploy -maxdepth 2 -type f | sort | head -50
+
+      - name: Copy deployment bundle to droplet
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.PRODUCTION_DROPLET_IP }}
           username: deploy
           key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
-          source: "."
+          source: ".deploy/*"
           target: "/opt/stackprime-marketing-site/app"
           port: 22
           overwrite: true
           timeout: 120s
           command_timeout: 25m
+          strip_components: 1
 
       - name: Create production environment file
         uses: appleboy/ssh-action@v1.2.0
