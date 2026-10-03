@@ -83,6 +83,13 @@ jobs:
             echo "Deploying marketing application..."
             echo "========================================"
 
+            echo "Stopping existing marketing container..."
+            docker compose stop marketing-site || true
+
+            echo "Removing existing marketing container..."
+            docker compose rm -f marketing-site || true
+
+            echo "Starting new marketing container..."
             docker compose up -d --no-deps marketing-site
 
             echo "========================================"
