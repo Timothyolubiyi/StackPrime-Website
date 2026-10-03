@@ -36,3 +36,5 @@ docker-compose.override.yml
 
 terraform.tfvars
 *.tfvars
+# SP VAS dependencies
+sp-vas/service/node_modules/
