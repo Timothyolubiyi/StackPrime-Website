@@ -1,23 +1,118 @@
-// Central content model for site structure, so the mega-menu, footer, and
-// service pages all read from one place rather than duplicating copy.
+#!/usr/bin/env node
+/**
+ * expand-services.mjs
+ *
+ * Replaces the Cloud Computing, Cybersecurity, Networking & IT Infrastructure,
+ * and Linux Server Administration entries in lib/site-data.ts with
+ * comprehensive versions covering every sub-service you listed, including
+ * overview copy, a full "what we deliver" feature grid, a process section,
+ * and an "ideal for" section. DevOps Engineering and the three installation
+ * services (Intercom/VoIP, LAN/WAN, CCTV) are untouched.
+ *
+ * Existing images (cloud-computing.jpg, cybersecurity-1.jpg, networking-1.jpg,
+ * linux-server-admin.jpg) are kept as-is. Swap in new ones later by changing
+ * the `image:` line for each service in lib/site-data.ts, or tell me the
+ * filenames and I'll give you a follow-up script.
+ *
+ * Usage (run from your marketing site's root folder):
+ *   node expand-services.mjs
+ *   node expand-services.mjs path/to/marketing-site
+ *
+ * Safe to run more than once — detects whether each service has already
+ * been expanded and skips it if so.
+ */
 
-export type SubService = {
-  name: string;
-};
+import fs from "node:fs";
+import path from "node:path";
 
-export type ServiceDomain = {
-  slug: string;
-  name: string;
-  shortName: string;
-  tagline: string;
-  description: string;
-  image: string;
-  subServices: SubService[];
-  cta: { label: string; href: string };
-};
+const root = process.argv[2] ? path.resolve(process.argv[2]) : process.cwd();
+const p = (...segments) => path.join(root, ...segments);
 
-export const serviceDomains: ServiceDomain[] = [
-    {
+function readText(file) {
+  const raw = fs.readFileSync(file, "utf8");
+  const crlf = raw.includes("\r\n");
+  return { text: crlf ? raw.replace(/\r\n/g, "\n") : raw, crlf };
+}
+function writeText(file, text, crlf) {
+  fs.writeFileSync(file, crlf ? text.replace(/\n/g, "\r\n") : text, "utf8");
+}
+function fail(message) {
+  console.error(`\n✗ ${message}\n`);
+  process.exit(1);
+}
+
+const summary = [];
+const record = (status, message) => summary.push({ status, message });
+
+const file = p("lib", "site-data.ts");
+if (!fs.existsSync(file)) {
+  fail(
+    `Could not find ${path.relative(root, file)} under ${root}\n` +
+      "  Run this from your marketing site's root folder, or pass the folder path:\n" +
+      "  node expand-services.mjs path/to/marketing-site"
+  );
+}
+
+let { text: source, crlf } = readText(file);
+
+/**
+ * Finds the object literal in `source` whose `slug: "<slug>"` field matches,
+ * and replaces the ENTIRE object (from its opening `{` to its matching
+ * closing `}`, including a trailing comma) with `newEntryText`.
+ * Uses brace-depth counting rather than literal text matching, so it works
+ * regardless of minor wording differences in the current file.
+ */
+function replaceServiceEntry(src, slug, newEntryText) {
+  const marker = `slug: "${slug}"`;
+  const markerIdx = src.indexOf(marker);
+  if (markerIdx === -1) return { ok: false };
+
+  const start = src.lastIndexOf("{", markerIdx);
+  if (start === -1) return { ok: false };
+
+  let depth = 0;
+  let i = start;
+  for (; i < src.length; i++) {
+    if (src[i] === "{") depth++;
+    else if (src[i] === "}") {
+      depth--;
+      if (depth === 0) {
+        i++;
+        break;
+      }
+    }
+  }
+  let end = i;
+  if (src[end] === ",") end++;
+
+  const before = src.slice(0, start);
+  const after = src.slice(end);
+  return { ok: true, text: before + newEntryText + after };
+}
+
+function alreadyExpanded(src, slug, sentinel) {
+  // crude but effective: check the sentinel string appears after this
+  // service's slug marker and before the next top-level service's slug
+  // (good enough since sentinels are unique strings only used here).
+  return src.includes(sentinel);
+}
+
+// ---------------------------------------------------------------------------
+// Shared process steps (reused with per-service wording)
+// ---------------------------------------------------------------------------
+function processSteps(a, b, c, d) {
+  return `[
+      { title: "Discovery & Assessment", description: "${a}" },
+      { title: "Design & Proposal", description: "${b}" },
+      { title: "Implementation & Configuration", description: "${c}" },
+      { title: "Testing, Documentation & Handover", description: "${d}" },
+    ]`;
+}
+
+// ---------------------------------------------------------------------------
+// 1. Cloud Computing
+// ---------------------------------------------------------------------------
+const CLOUD_ENTRY = `  {
     slug: "cloud-computing",
     name: "Cloud Computing",
     shortName: "Cloud",
@@ -76,12 +171,12 @@ export const serviceDomains: ServiceDomain[] = [
       { title: "Cloud Governance and Compliance Advisory", description: "Policies and controls that keep cloud usage aligned with your compliance and governance requirements." },
       { title: "Cloud Administration Training and Mentorship", description: "Hands-on training so your team can operate and maintain the cloud environment with confidence." },
     ],
-    process: [
-      { title: "Discovery & Assessment", description: "We review your current infrastructure, workloads, and goals to understand what the cloud environment actually needs to do." },
-      { title: "Design & Proposal", description: "A clear architecture and migration or build plan, covering provider choice, cost, security, and timeline." },
-      { title: "Implementation & Configuration", description: "Infrastructure provisioned as code, networking and security configured, and workloads deployed or migrated." },
-      { title: "Testing, Documentation & Handover", description: "Monitoring and alerting verified, documentation handed over, and your team walked through how it all works." },
-    ],
+    process: ${processSteps(
+      "We review your current infrastructure, workloads, and goals to understand what the cloud environment actually needs to do.",
+      "A clear architecture and migration or build plan, covering provider choice, cost, security, and timeline.",
+      "Infrastructure provisioned as code, networking and security configured, and workloads deployed or migrated.",
+      "Monitoring and alerting verified, documentation handed over, and your team walked through how it all works."
+    )},
     idealFor: [
       "Businesses planning their first move to the cloud",
       "Companies running multi-cloud, or wanting a second opinion on existing architecture",
@@ -91,25 +186,12 @@ export const serviceDomains: ServiceDomain[] = [
     ],
     ctaHeading: "Ready to plan your cloud infrastructure?",
     cta: { label: "Book a Consultation", href: "/company/contact" },
-  },
-  {
-    slug: "devops-engineering",
-    name: "DevOps Engineering",
-    shortName: "DevOps",
-    tagline: "Automated pipelines and infrastructure that ship faster, with fewer surprises.",
-    description:
-      "From CI/CD pipeline design to Infrastructure as Code, we build the automation layer that lets your team deploy confidently and often — not just occasionally and carefully.",
-    image: "/images/devops-1.jpg",
-    subServices: [
-      { name: "CI/CD Pipeline Design & Implementation" },
-      { name: "Infrastructure as Code (IaC)" },
-      { name: "Containerization & Orchestration" },
-      { name: "Monitoring & Observability" },
-      { name: "Release & Deployment Automation" },
-    ],
-    cta: { label: "Book a Consultation", href: "/company/contact" },
-  },
-    {
+  },`;
+
+// ---------------------------------------------------------------------------
+// 2. Cybersecurity
+// ---------------------------------------------------------------------------
+const CYBERSECURITY_ENTRY = `  {
     slug: "cybersecurity",
     name: "Cybersecurity",
     shortName: "Cybersecurity",
@@ -164,12 +246,12 @@ export const serviceDomains: ServiceDomain[] = [
       { title: "Backup Security and Disaster Recovery Planning", description: "Making sure backups are themselves secure, tested, and able to actually recover you." },
       { title: "Security Awareness and Technical Training", description: "Training for both end users and technical teams, building security habits that actually stick." },
     ],
-    process: [
-      { title: "Discovery & Assessment", description: "We assess your current security posture, assets, and risk areas to understand what matters most to protect." },
-      { title: "Design & Proposal", description: "A scoped plan covering methodology, standards referenced, and deliverables, with cost agreed upfront." },
-      { title: "Implementation & Configuration", description: "Assessment, hardening, or monitoring setup carried out hands-on, with findings documented as we go." },
-      { title: "Testing, Documentation & Handover", description: "A findings report with severity ratings, remediation guidance, and an executive summary for leadership." },
-    ],
+    process: ${processSteps(
+      "We assess your current security posture, assets, and risk areas to understand what matters most to protect.",
+      "A scoped plan covering methodology, standards referenced, and deliverables, with cost agreed upfront.",
+      "Assessment, hardening, or monitoring setup carried out hands-on, with findings documented as we go.",
+      "A findings report with severity ratings, remediation guidance, and an executive summary for leadership."
+    )},
     idealFor: [
       "Businesses needing a VAPT or security assessment",
       "Companies preparing for ISO 27001 or similar compliance",
@@ -179,8 +261,12 @@ export const serviceDomains: ServiceDomain[] = [
     ],
     ctaHeading: "Ready to request a security assessment?",
     cta: { label: "Request a Security Assessment", href: "/services/vapt-security-assessments" },
-  },
-    {
+  },`;
+
+// ---------------------------------------------------------------------------
+// 3. Networking & IT Infrastructure
+// ---------------------------------------------------------------------------
+const NETWORKING_ENTRY = `  {
     slug: "networking-it-infrastructure",
     name: "Networking & IT Infrastructure",
     shortName: "Networking",
@@ -239,12 +325,12 @@ export const serviceDomains: ServiceDomain[] = [
       { title: "Business Internet Connectivity Consulting", description: "Guidance on the right internet connectivity and redundancy for your business." },
       { title: "Network Infrastructure Training and Technical Support", description: "Training and ongoing support so your team can manage day-to-day network needs." },
     ],
-    process: [
-      { title: "Discovery & Assessment", description: "We assess your building, existing infrastructure, device counts, and connectivity needs before recommending anything." },
-      { title: "Design & Proposal", description: "A clear network design covering topology, equipment, cabling scope, and cost." },
-      { title: "Implementation & Configuration", description: "Cabling, equipment mounting, and configuration, carried out with minimal disruption to your working day." },
-      { title: "Testing, Documentation & Handover", description: "Every link tested, everything labelled and documented, and a walkthrough for your team." },
-    ],
+    process: ${processSteps(
+      "We assess your building, existing infrastructure, device counts, and connectivity needs before recommending anything.",
+      "A clear network design covering topology, equipment, cabling scope, and cost.",
+      "Cabling, equipment mounting, and configuration, carried out with minimal disruption to your working day.",
+      "Every link tested, everything labelled and documented, and a walkthrough for your team."
+    )},
     idealFor: [
       "Businesses setting up or relocating an office network",
       "Companies needing reliable WAN connectivity between multiple sites",
@@ -254,8 +340,12 @@ export const serviceDomains: ServiceDomain[] = [
     ],
     ctaHeading: "Ready to plan your network infrastructure?",
     cta: { label: "Book a Consultation", href: "/company/contact" },
-  },
-    {
+  },`;
+
+// ---------------------------------------------------------------------------
+// 4. Linux Server Administration
+// ---------------------------------------------------------------------------
+const LINUX_ENTRY = `  {
     slug: "linux-server-administration",
     name: "Linux Server Administration",
     shortName: "Linux Admin",
@@ -320,12 +410,12 @@ export const serviceDomains: ServiceDomain[] = [
       { title: "Production Server Setup and Maintenance", description: "Production environments set up correctly and maintained on an ongoing basis." },
       { title: "Linux Administration Training and Mentorship", description: "Hands-on training so your team can administer Linux servers with confidence." },
     ],
-    process: [
-      { title: "Discovery & Assessment", description: "We review your current servers, applications, and requirements to understand what the environment needs to do." },
-      { title: "Design & Proposal", description: "A clear plan covering distribution choice, server sizing, hosting architecture, and cost." },
-      { title: "Implementation & Configuration", description: "Server builds, hardening, hosting, and database setup carried out carefully, with minimal disruption." },
-      { title: "Testing, Documentation & Handover", description: "Performance and security verified, documentation handed over, and your team walked through day-to-day administration." },
-    ],
+    process: ${processSteps(
+      "We review your current servers, applications, and requirements to understand what the environment needs to do.",
+      "A clear plan covering distribution choice, server sizing, hosting architecture, and cost.",
+      "Server builds, hardening, hosting, and database setup carried out carefully, with minimal disruption.",
+      "Performance and security verified, documentation handed over, and your team walked through day-to-day administration."
+    )},
     idealFor: [
       "Businesses needing a production Linux server set up correctly from the start",
       "Companies hosting websites or applications that need reliable uptime",
@@ -335,47 +425,53 @@ export const serviceDomains: ServiceDomain[] = [
     ],
     ctaHeading: "Ready to plan your Linux server setup?",
     cta: { label: "Book a Consultation", href: "/company/contact" },
-  },
+  },`;
+
+// ---------------------------------------------------------------------------
+// Apply
+// ---------------------------------------------------------------------------
+const jobs = [
+  { slug: "cloud-computing", entry: CLOUD_ENTRY, sentinel: 'title: "Cloud Administration Training and Mentorship"', label: "Cloud Computing" },
+  { slug: "cybersecurity", entry: CYBERSECURITY_ENTRY, sentinel: 'title: "Security Awareness and Technical Training"', label: "Cybersecurity" },
+  { slug: "networking-it-infrastructure", entry: NETWORKING_ENTRY, sentinel: 'title: "Network Infrastructure Training and Technical Support"', label: "Networking & IT Infrastructure" },
+  { slug: "linux-server-administration", entry: LINUX_ENTRY, sentinel: 'title: "Linux Administration Training and Mentorship"', label: "Linux Server Administration" },
 ];
 
-export const mainNav = [
-  { label: "Home", href: "/" },
-  {
-    label: "Services",
-    href: "/services",
-    megaMenu: true,
-  },
-  { label: "Training Academy", href: "/training-academy" },
-  { label: "SaaS Products", href: "/saas-products" },
-  { label: "Web Solutions", href: "/web-solutions" },
-  {
-    label: "Company",
-    href: "/company/about",
-    dropdown: [
-      { label: "About Us", href: "/company/about" },
-      { label: "Careers", href: "/company/careers" },
-      { label: "Publications", href: "/company/publications" },
-      { label: "Contact Us", href: "/company/contact" },
-    ],
-  },
-];
+for (const job of jobs) {
+  if (source.includes(job.sentinel)) {
+    record("skip", `${job.label}: already expanded`);
+    continue;
+  }
+  const result = replaceServiceEntry(source, job.slug, job.entry);
+  if (!result.ok) {
+    record("fail", `${job.label}: couldn't find a service with slug "${job.slug}" in lib/site-data.ts`);
+    continue;
+  }
+  source = result.text;
+  record("done", `${job.label}: expanded with full sub-service list, features, process, and ideal-for sections`);
+}
 
-export const companyInfo = {
-  name: "StackPrime Consulting Ltd",
-  rc: "RC 9676973",
-  tagline: "Secure. Scalable. Connected. Empowering Your Digital Future.",
-  emailGeneral: "stackprimeconsulting@gmail.com",
-  emailOperations: "info@stackprimeconsulting.com.ng",
-  phone: "+234 814 440 1544",
-  location: "Lagos, Nigeria",
-  website: "www.stackprimeconsulting.com.ng",
-};
+const anyFail = summary.some((s) => s.status === "fail");
+if (anyFail) {
+  console.log("\nStackPrime: expand service pages — STOPPED, nothing was written\n");
+  for (const { status, message } of summary) {
+    console.log(`  ${status === "fail" ? "✗" : status === "done" ? "✓" : "·"} ${message}`);
+  }
+  console.log("\nNo changes were saved because at least one service couldn't be found.");
+  console.log("lib/site-data.ts may have been restructured since this script was written.\n");
+  process.exit(1);
+}
 
-export const standards = [
-  { name: "OWASP", detail: "Web application security testing" },
-  { name: "NIST SP 800-115", detail: "Technical security assessment guide" },
-  { name: "NIST CSF", detail: "Cybersecurity risk framework" },
-  { name: "CIS Controls v8", detail: "Prioritized security safeguards" },
-  { name: "ISO/IEC 27001", detail: "Information security management" },
-  { name: "CVSS v3.1", detail: "Vulnerability severity scoring" },
-];
+writeText(file, source, crlf);
+
+console.log("\nStackPrime: expand service pages\n");
+for (const { status, message } of summary) {
+  console.log(`  ${status === "done" ? "✓" : "·"} ${message}${status === "skip" ? "  (skipped)" : ""}`);
+}
+console.log("\nNext steps:");
+console.log("  1. git diff lib/site-data.ts      (review exactly what changed)");
+console.log("  2. npm run dev                     (then open each of the four service pages)");
+console.log("  3. /services/cloud-computing");
+console.log("     /services/cybersecurity");
+console.log("     /services/networking-it-infrastructure");
+console.log("     /services/linux-server-administration\n");
