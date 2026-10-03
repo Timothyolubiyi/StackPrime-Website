@@ -84,10 +84,10 @@ jobs:
             echo "========================================"
 
             echo "Stopping existing marketing container..."
-            docker compose stop marketing-site || true
+            docker stop stackprime-marketing-site 2>/dev/null || true
 
             echo "Removing existing marketing container..."
-            docker compose rm -f marketing-site || true
+            docker rm -f stackprime-marketing-site 2>/dev/null || true
 
             echo "Starting new marketing container..."
             docker compose up -d --no-deps marketing-site
