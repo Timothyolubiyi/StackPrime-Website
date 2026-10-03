@@ -28,7 +28,7 @@ jobs:
           port: 22
           overwrite: true
           timeout: 120s
-          command_timeout: 10m
+          command_timeout: 25m
 
       - name: Create production environment file
         uses: appleboy/ssh-action@v1.2.0
@@ -37,7 +37,7 @@ jobs:
           username: deploy
           key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
           timeout: 60s
-          command_timeout: 2m
+          command_timeout: 5m
           script: |
             set -e
 
@@ -55,7 +55,7 @@ jobs:
           username: deploy
           key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
           timeout: 60s
-          command_timeout: 15m
+          command_timeout: 25m
           script: |
             set -e
 
@@ -133,7 +133,7 @@ jobs:
           username: deploy
           key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
           timeout: 60s
-          command_timeout: 3m
+          command_timeout: 15m
           script: |
             set -e
 
