@@ -1,9 +1,76 @@
-node_modules
-.next
+# ============================================================
+# Git / CI
+# ============================================================
 .git
 .github
+
+# ============================================================
+# Dependencies
+# ============================================================
+node_modules
+**/node_modules
+
+# ============================================================
+# Next.js build output
+# ============================================================
+.next
+**/.next
+
+# ============================================================
+# Environment / secrets
+# ============================================================
 .env
 .env.*
-!.env.example
-nginx/certbot/
+**/.env
+**/.env.*
 
+# Keep example environment files if needed by documentation.
+!.env.example
+!**/.env.example
+
+# ============================================================
+# Logs
+# ============================================================
+*.log
+**/*.log
+
+# ============================================================
+# Local development / editor files
+# ============================================================
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+
+# ============================================================
+# Local Terraform state
+# ============================================================
+**/.terraform
+**/.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+*.tfplan
+
+# ============================================================
+# Docker / local infrastructure
+# ============================================================
+docker-compose*.yml
+**/docker-compose*.yml
+
+# Docker development infrastructure that is not required
+# inside the production application image.
+marketing-site/docker/
+marketing-site/nginx/
+
+# ============================================================
+# Documentation / project management
+# ============================================================
+README.md
+**/README.md
+CLAUDE.md
+**/CLAUDE.md
+Checklist.md
+**/Checklist.md
+DEPLOY-SETUP.md
+INFRASTRUCTURE.md
+OPERATIONS.md

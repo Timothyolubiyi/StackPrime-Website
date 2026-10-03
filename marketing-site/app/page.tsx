@@ -102,7 +102,7 @@ export default function HomePage() {
           <div className="max-w-2xl">
             <div className="text-sm font-semibold text-gold">Consulting Services</div>
             <h2 className="mt-2 font-serif text-3xl font-bold text-navy md:text-4xl">
-              Five domains. One standard of delivery.
+              Consulting and installation. One standard of delivery.
             </h2>
           </div>
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
