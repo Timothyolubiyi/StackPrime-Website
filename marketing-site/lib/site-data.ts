@@ -9,8 +9,16 @@ export type ServiceDomain = {
   slug: string;
   name: string;
   shortName: string;
+  eyebrow?: string;      // required: every service has one
   tagline: string;
+  imageAlt?: string;      // optional: only some services have one, keep your other existing fields here
   description: string;
+  overview: string[];
+  features: { title: string; description: string }[];
+  process: { title: string; description: string }[];
+  idealFor: string[];
+  ctaHeading?: string;
+  
   image: string;
   subServices: SubService[];
   cta: { label: string; href: string };
@@ -96,19 +104,208 @@ export const serviceDomains: ServiceDomain[] = [
     slug: "devops-engineering",
     name: "DevOps Engineering",
     shortName: "DevOps",
-    tagline: "Automated pipelines and infrastructure that ship faster, with fewer surprises.",
+    eyebrow: "Consulting, Automation & Engineering",
+    tagline:
+      "Build reliable delivery pipelines, automate infrastructure, and release software with greater confidence.",
     description:
-      "From CI/CD pipeline design to Infrastructure as Code, we build the automation layer that lets your team deploy confidently and often — not just occasionally and carefully.",
+      "StackPrime Consulting helps organizations modernize software delivery and infrastructure operations through DevOps engineering, CI/CD automation, Infrastructure as Code, containerization, cloud deployment, DevSecOps, monitoring, and operational reliability. We design practical, repeatable workflows that reduce manual effort, improve consistency, and support secure, scalable growth.",
     image: "/images/devops-1.jpg",
-    subServices: [
-      { name: "CI/CD Pipeline Design & Implementation" },
-      { name: "Infrastructure as Code (IaC)" },
-      { name: "Containerization & Orchestration" },
-      { name: "Monitoring & Observability" },
-      { name: "Release & Deployment Automation" },
+    imageAlt:
+      "DevOps engineering with automated delivery pipelines and infrastructure",
+
+    overview: [
+      "DevOps is more than a collection of tools. It is a way of connecting software development, infrastructure operations, security, and service management so that organizations can deliver changes reliably and maintain their applications with confidence. StackPrime Consulting helps teams assess their current delivery practices, identify operational bottlenecks, and implement automation suited to their applications, infrastructure, and business objectives.",
+
+      "Our CI/CD engineering services cover the design, implementation, and improvement of automated workflows for source control, code validation, testing, artifact management, deployment, and release verification. Using appropriate tools such as Jenkins and GitHub Actions, we help establish repeatable delivery processes, environment-specific controls, and documented recovery procedures. The goal is to make software releases more consistent, traceable, and manageable.",
+
+      "We use Infrastructure as Code and configuration management to reduce dependence on manual infrastructure changes. Terraform or OpenTofu can be used to define and provision supported infrastructure, while Ansible can automate server configuration, software installation, and operational tasks. Version-controlled configurations, peer review, and environment separation help make infrastructure changes easier to understand, reproduce, and audit.",
+
+      "For container-based applications, we provide Docker containerization, image management, deployment configuration, and Kubernetes orchestration support where appropriate. We can help teams structure container workloads, manage application configuration and secrets, configure health checks, and plan deployments around availability and operational requirements. Architecture and platform choices are based on the actual workload rather than adopting complexity without a clear need.",
+
+      "Cloud DevOps services help organizations automate and operate workloads across AWS, Microsoft Azure, and Google Cloud Platform. Engagements can include cloud infrastructure provisioning, networking and identity configuration, automated deployment, environment management, cloud monitoring, backup planning, and cost-conscious resource design. We also support hybrid environments where cloud resources must integrate with existing systems.",
+
+      "Security is incorporated into delivery and infrastructure workflows through DevSecOps practices. Depending on project scope, this may include dependency and container image scanning, static code analysis, Infrastructure-as-Code security checks, secrets detection, access controls, approval gates, and audit-friendly deployment records. Security controls are selected to fit the application's risk profile and the organization's requirements.",
+
+      "Reliable operations require visibility into what applications and infrastructure are doing. We help teams establish useful monitoring, centralized logging, health checks, metrics, dashboards, and alerting. We also support Site Reliability Engineering practices such as service-level indicators, service-level objectives, incident investigation, capacity planning, recovery testing, and post-incident improvement where these practices suit the service.",
+
+      "Our work includes knowledge transfer and operational enablement. We provide implementation documentation, deployment runbooks, troubleshooting guidance, and practical training to help internal teams understand, operate, and maintain the environments delivered. Engagements can range from a focused pipeline improvement to a broader DevOps transformation roadmap."
     ],
-    cta: { label: "Book a Consultation", href: "/company/contact" },
+
+    features: [
+      {
+        title: "DevOps Strategy and Maturity Assessment",
+        description:
+          "Review existing development, deployment, infrastructure, and operational practices; identify bottlenecks; and develop a prioritized roadmap for automation, collaboration, reliability, and continuous improvement."
+      },
+      {
+        title: "CI/CD Pipeline Design and Implementation",
+        description:
+          "Design and implement automated workflows using Jenkins, GitHub Actions, and suitable integrations for source control, build, testing, artifact creation, deployment, approvals, and release verification."
+      },
+      {
+        title: "Git Workflow and Release Engineering",
+        description:
+          "Establish practical branching, pull-request, code-review, versioning, release-tagging, artifact-retention, and promotion practices to improve traceability and control across development and production."
+      },
+      {
+        title: "Infrastructure as Code",
+        description:
+          "Define and manage infrastructure using Terraform or OpenTofu, with reusable modules, environment-specific configuration, controlled state management, reviewed changes, and repeatable provisioning workflows."
+      },
+      {
+        title: "Configuration Management and Automation",
+        description:
+          "Use Ansible and related automation practices for server configuration, package installation, application setup, system hardening, patching workflows, and repeatable operational tasks."
+      },
+      {
+        title: "Docker and Containerization",
+        description:
+          "Containerize applications, develop maintainable Dockerfiles, configure multi-stage builds, manage runtime settings, and establish image versioning and deployment practices suitable for each workload."
+      },
+      {
+        title: "Kubernetes and Container Orchestration",
+        description:
+          "Support Kubernetes deployment architecture, workload configuration, services, ingress, resource requests and limits, health probes, rollout strategies, and operational troubleshooting. Managed platforms such as Amazon EKS can be considered when required."
+      },
+      {
+        title: "GitOps and Continuous Delivery",
+        description:
+          "Implement Git-driven deployment and configuration workflows using tools such as Argo CD where appropriate, with reviewed changes, environment promotion, deployment reconciliation, and a clear audit trail."
+      },
+      {
+        title: "Cloud DevOps Engineering",
+        description:
+          "Automate cloud infrastructure and application delivery across AWS, Azure, and GCP, including suitable compute, networking, identity, storage, deployment, monitoring, and environment-management services."
+      },
+      {
+        title: "DevSecOps and Pipeline Security",
+        description:
+          "Integrate appropriate security controls into development and delivery workflows, including dependency analysis, static analysis, image scanning, secrets detection, IaC scanning, least-privilege access, and controlled deployment approvals."
+      },
+      {
+        title: "Secrets and Configuration Management",
+        description:
+          "Separate application configuration from source code, manage environment-specific settings, reduce accidental credential exposure, and integrate appropriate secret-management mechanisms into deployment workflows."
+      },
+      {
+        title: "Infrastructure and Application Monitoring",
+        description:
+          "Establish health checks, metrics, logs, dashboards, and actionable alerts to help teams identify service degradation, investigate failures, and understand infrastructure and application behavior."
+      },
+      {
+        title: "Site Reliability Engineering",
+        description:
+          "Apply suitable SRE practices such as service-level indicators and objectives, availability tracking, capacity planning, incident reviews, operational toil reduction, and reliability improvement."
+      },
+      {
+        title: "Deployment Strategies and Rollback Planning",
+        description:
+          "Design deployment and recovery procedures using suitable rolling, blue-green, or canary strategies where supported by the application and platform, with validation steps and documented rollback criteria."
+      },
+      {
+        title: "Cloud Cost and Resource Optimization",
+        description:
+          "Review infrastructure utilization, environment lifecycles, resource sizing, build consumption, storage retention, and deployment architecture to identify opportunities for cost control without compromising required reliability."
+      },
+      {
+        title: "Backup, Recovery, and Resilience",
+        description:
+          "Plan backup and restoration procedures, document recovery objectives, identify service dependencies, and validate recovery processes appropriate to the system's availability and business-continuity requirements."
+      },
+      {
+        title: "Linux and Server Operations Automation",
+        description:
+          "Automate repeatable Linux administration tasks, service configuration, deployment preparation, patching procedures, log management, access controls, and operational checks."
+      },
+      {
+        title: "DevOps Documentation and Team Enablement",
+        description:
+          "Produce architecture notes, pipeline documentation, infrastructure instructions, runbooks, troubleshooting procedures, and practical knowledge-transfer sessions for internal technical teams."
+      },
+      {
+        title: "DevOps Training and Mentorship",
+        description:
+          "Provide practical, project-oriented learning in Git, CI/CD, Terraform, Ansible, Docker, Kubernetes, cloud deployment, monitoring, and DevSecOps, adapted to the learners' experience and objectives."
+      }
+    ],
+
+    process: [
+      {
+        title: "Discovery and Current-State Assessment",
+        description:
+          "Review the application architecture, repositories, cloud resources, deployment process, operational responsibilities, security requirements, and existing pain points. Agree on the scope and measurable objectives before implementation."
+      },
+      {
+        title: "Architecture and Implementation Planning",
+        description:
+          "Select appropriate tools and design the pipeline, infrastructure, environments, security controls, monitoring, and release process. Document dependencies, access requirements, risks, acceptance criteria, and rollback considerations."
+      },
+      {
+        title: "Build and Automate",
+        description:
+          "Implement the agreed pipeline, infrastructure code, configuration automation, container workflows, and supporting integrations. Use version control and reviewable changes so that the implementation remains understandable and maintainable."
+      },
+      {
+        title: "Validate Security and Reliability",
+        description:
+          "Test build and deployment workflows, verify configuration and access controls, inspect logs and health checks, validate failure handling, and confirm that recovery procedures meet the agreed acceptance criteria."
+      },
+      {
+        title: "Deploy and Handover",
+        description:
+          "Release through the agreed change process, monitor the resulting environment, provide documentation and runbooks, and transfer operational knowledge to the responsible team."
+      },
+      {
+        title: "Measure and Improve",
+        description:
+          "Review agreed indicators such as deployment duration, change failure rate, recovery time, automation coverage, service availability, and infrastructure cost where relevant. Use the results to prioritize the next improvements."
+      }
+    ],
+
+    idealFor: [
+      "Organizations seeking to automate manual build, test, and deployment activities",
+      "Software teams that need more consistent and traceable releases",
+      "Businesses adopting cloud infrastructure or modernizing existing deployments",
+      "Teams implementing Terraform, OpenTofu, Ansible, or other Infrastructure-as-Code practices",
+      "Organizations containerizing applications with Docker or adopting Kubernetes",
+      "Teams seeking GitOps workflows and controlled continuous delivery",
+      "Businesses integrating security checks into CI/CD and infrastructure workflows",
+      "Organizations experiencing recurring deployment failures or limited operational visibility",
+      "Teams improving service reliability, incident response, backup, and recovery practices",
+      "Startups and growing businesses establishing maintainable DevOps foundations",
+      "IT professionals and teams seeking hands-on DevOps training and mentoring"
+    ],
+
+    ctaHeading: "Ready to make your software delivery more reliable?",
+
+    subServices: [
+      { name: "DevOps Strategy and Maturity Assessment" },
+      { name: "CI/CD Pipeline Design and Implementation" },
+      { name: "Git Workflow and Release Engineering" },
+      { name: "Infrastructure as Code (Terraform and OpenTofu)" },
+      { name: "Configuration Management with Ansible" },
+      { name: "Docker Containerization" },
+      { name: "Kubernetes and Container Orchestration" },
+      { name: "GitOps and Continuous Delivery with Argo CD" },
+      { name: "AWS, Azure, and GCP DevOps" },
+      { name: "DevSecOps and Pipeline Security" },
+      { name: "Secrets and Configuration Management" },
+      { name: "Monitoring, Logging, and Observability" },
+      { name: "Site Reliability Engineering (SRE)" },
+      { name: "Deployment Strategies and Rollback Planning" },
+      { name: "Cloud Cost Optimization" },
+      { name: "Backup, Recovery, and Resilience Planning" },
+      { name: "Linux and Server Operations Automation" },
+      { name: "DevOps Documentation and Team Enablement" },
+      { name: "DevOps Training and Mentorship" }
+    ],
+
+    cta: {
+      label: "Book a Consultation",
+      href: "/company/contact"
+    }
   },
+
     {
     slug: "cybersecurity",
     name: "Cybersecurity",
