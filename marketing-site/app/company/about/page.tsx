@@ -34,7 +34,7 @@ export default function AboutPage() {
             <div className="md:col-span-2">
               <p className="text-muted">
                 <b>StackPrime Consulting Ltd</b> is a technology consulting and professional training firm, focuses on helping organizations build, secure, automate, and optimize modern technology environments. We provide practical, business-focused technology solutions
-                 across Cloud Computing, DevOps and Automation, Cybersecurity, Networking and Telecommunications, Linux and Systems Administration, and IT Project Management. Our goal is to help
+                 across Cloud Computing, DevOps and Automation, Software and Applications Development, Cybersecurity, Networking and Telecommunications, Linux and Systems Administration, and IT Project Management. Our goal is to help
                   organizations strengthen their technology infrastructure, improve operational efficiency, reduce unnecessary complexity, and build secure and scalable platforms that can support
                    long-term growth.
               </p>
