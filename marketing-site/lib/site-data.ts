@@ -5,6 +5,13 @@ export type SubService = {
   name: string;
 };
 
+export type ServiceCatalogItem = {
+  title: string;
+  description: string;
+  image: string;
+  imageAlt: string;
+};
+
 export type ServiceDomain = {
   slug: string;
   name: string;
@@ -813,8 +820,441 @@ export const serviceDomains: ServiceDomain[] = [
     ],
     ctaHeading: "Ready to plan your CCTV installation?",
     cta: { label: "Book a Consultation", href: "/company/contact" },
-  }
+  },
+
+  
+  {
+    slug: "software-apps-development",
+    name: "Software & Apps Development",
+    shortName: "Software Development",
+    eyebrow: "Software Engineering & Digital Solutions",
+    tagline:
+      "Purpose-built software and applications that solve business problems, improve workflows, and support digital growth.",
+    description:
+      "StackPrime Consulting Ltd designs, develops, tests, deploys, and supports custom software, responsive web applications, mobile applications, APIs, and business automation solutions.",
+    image: "/images/software-app-development.jpeg",
+    imageAlt: "Software and application development",
+    overview: [
+      "StackPrime Consulting Ltd helps businesses turn ideas, operational challenges, and customer needs into practical software solutions. We work from requirements discovery and solution design through development, testing, deployment, documentation, and ongoing improvement. Each engagement is scoped around the intended users, business objectives, budget, security requirements, and expected growth.",
+      "Our software engineering services cover custom business applications, responsive web platforms, mobile application development, backend systems, database design, API development, and integrations with third-party services. We aim to deliver intuitive user experiences supported by maintainable code, reliable data handling, and architectures suited to the application’s real requirements.",
+      "Security, scalability, performance, and maintainability are considered throughout the development lifecycle. Depending on project needs, we can incorporate version control, automated testing, CI/CD pipelines, containerization, cloud hosting, monitoring, backups, and documented deployment procedures. The result is a solution your organization can operate, maintain, and evolve with confidence.",
+    ],
+    subServices: [
+      { name: "Custom Software Development" },
+      { name: "Business Process and Workflow Applications" },
+      { name: "Web Application Design and Development" },
+      { name: "Responsive Website and Web Portal Development" },
+      { name: "Mobile Application Development" },
+      { name: "Frontend Development and User Interfaces" },
+      { name: "Backend Development and Business Logic" },
+      { name: "REST API Design and Development" },
+      { name: "Third-Party API and Platform Integration" },
+      { name: "Database Design and Optimization" },
+      { name: "UI/UX Design and Prototyping" },
+      { name: "Software Testing and Quality Assurance" },
+      { name: "Application Security Reviews" },
+      { name: "Performance and Reliability Optimization" },
+      { name: "Cloud Application Deployment and Hosting" },
+      { name: "CI/CD and Release Automation" },
+      { name: "Application Maintenance and Enhancements" },
+      { name: "Technical Documentation and Handover" },
+    ],
+    features: [
+      {
+        title: "Custom Software Solutions",
+        description:
+          "Build applications around your business processes, reporting needs, operational workflows, and customer requirements rather than forcing your organization into an unsuitable off-the-shelf system.",
+      },
+      {
+        title: "Web Application Development",
+        description:
+          "Develop responsive web applications, customer portals, dashboards, internal business tools, and online platforms designed for usability across desktop, tablet, and mobile devices.",
+      },
+      {
+        title: "Mobile Application Development",
+        description:
+          "Plan and develop mobile application experiences around your target users, required device capabilities, backend services, and distribution requirements.",
+      },
+      {
+        title: "Frontend and User Experience",
+        description:
+          "Create clear interfaces, responsive layouts, accessible interactions, and consistent user journeys aligned with your brand and application goals.",
+      },
+      {
+        title: "Backend, APIs, and Integrations",
+        description:
+          "Implement application logic, authentication flows, APIs, data processing, and integrations with suitable third-party platforms and business systems.",
+      },
+      {
+        title: "Database Design and Management",
+        description:
+          "Structure application data with appropriate schemas, validation, access controls, backup strategies, and performance considerations.",
+      },
+      {
+        title: "Testing and Quality Assurance",
+        description:
+          "Use appropriate functional, integration, regression, and performance testing to identify defects and improve release confidence.",
+      },
+      {
+        title: "Application Security",
+        description:
+          "Apply secure development practices, input validation, access control, secret management, dependency hygiene, and security testing appropriate to the application.",
+      },
+      {
+        title: "Cloud Deployment and DevOps",
+        description:
+          "Deploy applications using suitable hosting and cloud infrastructure, with automated build and release workflows where appropriate.",
+      },
+      {
+        title: "Maintenance and Continuous Improvement",
+        description:
+          "Support bug fixes, compatibility updates, performance improvements, documentation, and feature enhancements as business needs evolve.",
+      },
+    ],
+    process: [
+      {
+        title: "Discovery and Requirements",
+        description:
+          "Understand the business problem, intended users, essential features, constraints, integrations, budget, and measurable outcomes.",
+      },
+      {
+        title: "Solution Architecture and Planning",
+        description:
+          "Define the application scope, technology approach, data model, interfaces, milestones, delivery risks, and deployment requirements.",
+      },
+      {
+        title: "UI/UX Design and Prototyping",
+        description:
+          "Map user journeys and develop interface concepts or prototypes so stakeholders can review the proposed experience before implementation.",
+      },
+      {
+        title: "Development and Integration",
+        description:
+          "Implement frontend interfaces, backend services, databases, APIs, and required integrations using version-controlled development practices.",
+      },
+      {
+        title: "Testing and Security Validation",
+        description:
+          "Validate requirements, investigate defects, test critical user journeys, and review security and performance considerations before release.",
+      },
+      {
+        title: "Deployment and Launch",
+        description:
+          "Prepare the production environment, configure application settings, deploy the release, and verify the essential application functions.",
+      },
+      {
+        title: "Documentation and Handover",
+        description:
+          "Provide agreed technical documentation, operating guidance, and knowledge transfer for the people responsible for the application.",
+      },
+      {
+        title: "Support and Enhancement",
+        description:
+          "Agree on ongoing support, maintenance, monitoring, and future improvements based on the application's operational needs.",
+      },
+    ],
+    idealFor: [
+      "Startups validating a software product or digital business idea",
+      "Small and medium-sized businesses replacing manual processes with software",
+      "Organizations that need custom web applications or customer portals",
+      "Businesses seeking mobile application development",
+      "Teams integrating existing systems through APIs and automation",
+      "Organizations modernizing legacy applications",
+      "Companies that need cloud deployment and automated software delivery",
+      "Businesses requiring ongoing application maintenance and technical support",
+    ],
+    ctaHeading:
+      "Have a software idea or business process to improve?",
+    cta: {
+      label: "Discuss Your Project",
+      href: "/company/contact",
+    },
+  },
 ];
+
+
+
+export const serviceCatalog: Record<string, ServiceCatalogItem[]> = {
+  "cloud-computing": [
+    {
+      title: "Multi-Cloud Strategy",
+      description:
+        "Practical AWS, Azure, and GCP architecture designed around your workloads, budget, and growth.",
+      image: "/images/cloud-computing.jpg",
+      imageAlt: "Cloud computing infrastructure",
+    },
+    {
+      title: "Cloud Infrastructure & Migration",
+      description:
+        "Modernize infrastructure, migrate workloads, and build scalable cloud environments with less operational friction.",
+      image: "/images/aws-coverpage.png",
+      imageAlt: "Cloud infrastructure and architecture",
+    },
+    {
+      title: "Cloud Security & Identity",
+      description:
+        "Protect cloud environments with strong identity, access control, monitoring, and security configuration.",
+      image: "/images/cybersecurity-2.jpg",
+      imageAlt: "Cloud security and identity management",
+    },
+    {
+      title: "Automation & Infrastructure as Code",
+      description:
+        "Terraform, Ansible, and CI/CD automation for repeatable, auditable, and maintainable infrastructure.",
+      image: "/images/devops-2.jpg",
+      imageAlt: "DevOps automation and infrastructure as code",
+    },
+  ],
+
+  "devops-engineering": [
+    {
+      title: "CI/CD Pipeline Engineering",
+      description:
+        "Automated build, test, security, and deployment pipelines that make software delivery predictable.",
+      image: "/images/devops-1.jpg",
+      imageAlt: "DevOps CI/CD pipeline engineering",
+    },
+    {
+      title: "Infrastructure as Code",
+      description:
+        "Repeatable infrastructure provisioning with Terraform and configuration automation with Ansible.",
+      image: "/images/devops-2.jpg",
+      imageAlt: "Infrastructure as code and DevOps automation",
+    },
+    {
+      title: "Containers & Cloud Deployment",
+      description:
+        "Containerized applications deployed across modern cloud and Kubernetes environments.",
+      image: "/images/product-ui-1.jpg",
+      imageAlt: "Cloud application deployment",
+    },
+    {
+      title: "DevSecOps & Delivery Security",
+      description:
+        "Security integrated into development and delivery workflows without slowing engineering teams down.",
+      image: "/images/cybersecurity-1.jpg",
+      imageAlt: "DevSecOps security engineering",
+    },
+  ],
+
+  cybersecurity: [
+    {
+      title: "Cybersecurity Assessment",
+      description:
+        "Identify vulnerabilities, configuration weaknesses, and security gaps across your environment.",
+      image: "/images/vapt-2.jpg",
+      imageAlt: "Cybersecurity vulnerability assessment",
+    },
+    {
+      title: "Security Operations",
+      description:
+        "Improve visibility, monitoring, alerting, and response capabilities across infrastructure and systems.",
+      image: "/images/cybersecurity-2.jpg",
+      imageAlt: "Cybersecurity operations and monitoring",
+    },
+    {
+      title: "Security Awareness & Training",
+      description:
+        "Practical cybersecurity training that helps teams understand threats and make safer technology decisions.",
+      image: "/images/Cybersecurity-beginners.png",
+      imageAlt: "Cybersecurity training",
+    },
+    {
+      title: "Vulnerability & Risk Management",
+      description:
+        "Assess vulnerabilities and prioritize remediation based on business risk and exposure.",
+      image: "/images/vapt-1.jpg",
+      imageAlt: "Vulnerability assessment and penetration testing",
+    },
+  ],
+
+  "networking-it-infrastructure": [
+    {
+      title: "Network Architecture",
+      description:
+        "Design reliable LAN, WAN, routing, switching, wireless, and enterprise network environments.",
+      image: "/images/networking-1.jpg",
+      imageAlt: "Network architecture and infrastructure",
+    },
+    {
+      title: "Network Deployment",
+      description:
+        "Configure and deploy network infrastructure with structured addressing, routing, switching, and connectivity.",
+      image: "/images/networking-2.jpg",
+      imageAlt: "Network deployment and optimization",
+    },
+    {
+      title: "Cisco & Network Administration",
+      description:
+        "Hands-on configuration, troubleshooting, administration, and optimization of network equipment.",
+      image: "/images/cisco-cli.png",
+      imageAlt: "Cisco network administration",
+    },
+    {
+      title: "Infrastructure Connectivity",
+      description:
+        "Connect offices, branches, cloud environments, and remote users with secure and dependable infrastructure.",
+      image: "/images/office-home-lan-wan.jpg",
+      imageAlt: "Structured office LAN and WAN infrastructure",
+    },
+  ],
+
+  "linux-server-administration": [
+    {
+      title: "Linux Server Deployment",
+      description:
+        "Deploy and configure secure Linux servers for applications, databases, web services, and infrastructure workloads.",
+      image: "/images/linux-server-admin.jpg",
+      imageAlt: "Linux server administration",
+    },
+    {
+      title: "Server Hardening",
+      description:
+        "Apply practical security controls, access restrictions, system configuration, and operational best practices.",
+      image: "/images/cybersecurity-2.jpg",
+      imageAlt: "Linux server security hardening",
+    },
+    {
+      title: "Network & Service Configuration",
+      description:
+        "Configure Linux networking, services, system access, DNS, web services, and infrastructure components.",
+      image: "/images/networking-2.jpg",
+      imageAlt: "Linux networking and service configuration",
+    },
+    {
+      title: "Automation & Administration",
+      description:
+        "Automate repetitive server administration tasks and improve consistency across environments.",
+      image: "/images/devops-2.jpg",
+      imageAlt: "Linux infrastructure automation",
+    },
+  ],
+
+  "intercom-voip-installation": [
+    {
+      title: "IP Intercom Systems",
+      description:
+        "Deploy modern IP-based intercom systems for homes, offices, facilities, and controlled access environments.",
+      image: "/images/intercom-voip.jpg",
+      imageAlt: "Intercom installation and configuration",
+    },
+    {
+      title: "VoIP Communication",
+      description:
+        "Implement practical voice communication infrastructure for organizations that need reliable internal calling.",
+      image: "/images/intercom-voip.jpg",
+      imageAlt: "VoIP communication and IP intercom systems",
+    },
+    {
+      title: "Office Communication Infrastructure",
+      description:
+        "Integrate communication systems into structured office networking and infrastructure environments.",
+      image: "/images/network-deployment-optimization.jpg",
+      imageAlt: "Office communication infrastructure",
+    },
+    {
+      title: "Installation & Configuration",
+      description:
+        "Professional installation, configuration, testing, and handover of intercom and communication systems.",
+      image: "/images/intercom-installation-configuration.jpg",
+      imageAlt: "Intercom installation and configuration",
+    },
+  ],
+
+  "office-home-lan-wan-installation": [
+    {
+      title: "LAN Installation",
+      description:
+        "Structured local-area networking for homes, offices, branches, and small business environments.",
+      image: "/images/office-home-lan-wan.jpg",
+      imageAlt: "Office and home LAN installation",
+    },
+    {
+      title: "WAN & Site Connectivity",
+      description:
+        "Connect offices and locations with dependable network infrastructure designed around operational needs.",
+      image: "/images/networking-1.jpg",
+      imageAlt: "WAN and site connectivity",
+    },
+    {
+      title: "Structured Office Infrastructure",
+      description:
+        "Plan and deploy practical cabling, network equipment, wireless connectivity, and infrastructure.",
+      image: "/images/structured-office-infrastructure.jpg",
+      imageAlt: "Structured office network infrastructure",
+    },
+    {
+      title: "Network Deployment & Optimization",
+      description:
+        "Install, configure, troubleshoot, and optimize existing home and office networks.",
+      image: "/images/network-deployment-optimization.jpg",
+      imageAlt: "Office network deployment",
+    },
+  ],
+
+  "cctv-camera-installation": [
+    {
+      title: "CCTV Camera Installation",
+      description:
+        "Professional camera deployment designed around the areas, assets, and risks that matter most.",
+      image: "/images/cctv-installation.jpg",
+      imageAlt: "CCTV camera installation",
+    },
+    {
+      title: "Security Coverage Planning",
+      description:
+        "Plan camera positioning and coverage to reduce blind spots and improve visibility across your property.",
+      image: "/images/structured-office-infrastructure.jpg",
+      imageAlt: "Security coverage planning",
+    },
+    {
+      title: "Networked Surveillance",
+      description:
+        "Integrate surveillance systems with network infrastructure for dependable access and monitoring.",
+      image: "/images/networking-2.jpg",
+      imageAlt: "Networked surveillance infrastructure",
+    },
+    {
+      title: "Monitoring Infrastructure",
+      description:
+        "Configure practical monitoring and recording infrastructure for homes, offices, and commercial facilities.",
+      image: "/images/intercom-installation-configuration.jpg",
+      imageAlt: "Security monitoring infrastructure",
+    },
+  ],
+  
+  "software-apps-development": [
+    {
+      title: "Custom Software Solutions",
+      description:
+        "Business applications and digital tools designed around your workflows, operational requirements, and growth plans.",
+      image: "/images/software-app-development.jpeg",
+      imageAlt: "Software application development",
+    },
+    {
+      title: "Mobile Application Development",
+      description:
+        "Mobile app experiences designed around your users, essential features, and business objectives.",
+      image: "/images/software-mobile-apps.jpeg",
+      imageAlt: "Mobile applications displayed on a smartphone",
+    },
+    {
+      title: "Web Applications & Digital Platforms",
+      description:
+        "Responsive interfaces and web-based platforms that help customers and teams access services and information.",
+      image: "/images/software-app-development.jpeg",
+      imageAlt: "Application interface and software development",
+    },
+    {
+      title: "APIs, Integration & Automation",
+      description:
+        "Connect application services and business systems to streamline data exchange and reduce repetitive work.",
+      image: "/images/software-mobile-apps.jpeg",
+      imageAlt: "Mobile application ecosystem",
+    },
+  ],
+};
+
 
 export const mainNav = [
   { label: "Home", href: "/" },

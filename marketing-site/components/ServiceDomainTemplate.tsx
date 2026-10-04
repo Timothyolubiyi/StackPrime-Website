@@ -1,7 +1,7 @@
 import PageHero from "./PageHero";
 import Container from "./Container";
 import CtaButton from "./CtaButton";
-import type { ServiceDomain } from "@/lib/site-data";
+import { serviceCatalog, type ServiceDomain } from "@/lib/site-data";
 
 export default function ServiceDomainTemplate({
   service,
@@ -53,6 +53,59 @@ export default function ServiceDomainTemplate({
           </div>
         </Container>
       </section>
+
+      {serviceCatalog[service.slug]?.length > 0 && (
+        <section className="bg-[#F7F8FA] py-16">
+          <Container>
+            <div className="max-w-3xl">
+              <div className="text-sm font-semibold uppercase tracking-wider text-gold">
+                Service Catalog
+              </div>
+
+              <h2 className="mt-2 font-serif text-3xl font-bold text-navy md:text-4xl">
+                Solutions built around your needs
+              </h2>
+
+              <p className="mt-4 text-med text-muted">
+                Explore some of the core solutions StackPrime delivers across
+                this service area.
+              </p>
+            </div>
+
+            <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {serviceCatalog[service.slug].map((item) => (
+                <article
+                  key={item.title}
+                  className="group overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                >
+                  <div className="relative h-52 overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={item.image}
+                      alt={item.imageAlt}
+                      loading="lazy"
+                      decoding="async"
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+
+                    <div className="absolute inset-0 bg-gradient-to-t from-navy/60 via-transparent to-transparent" />
+                  </div>
+
+                  <div className="p-5">
+                    <h3 className="font-serif text-xl font-semibold leading-tight text-navy">
+                      {item.title}
+                    </h3>
+
+                    <p className="mt-3 text-sm leading-6 text-muted">
+                      {item.description}
+                    </p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </Container>
+        </section>
+      )}
 
       {service.features && service.features.length > 0 && (
         <section className="bg-[#F7F8FA] py-16">

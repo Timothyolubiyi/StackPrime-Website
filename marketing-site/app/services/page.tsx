@@ -7,7 +7,7 @@ import { serviceDomains } from "@/lib/site-data";
 export const metadata: Metadata = {
   title: "Services",
   description:
-    "Cloud, DevOps, Cybersecurity, Networking & IT Infrastructure, Linux Server Administration, and specialist installation services from StackPrime Consulting Ltd.",
+    "Software and app development, cloud computing, DevOps engineering, cybersecurity, networking and IT infrastructure, Linux server administration, and specialist installation services from StackPrime Consulting Ltd.",
 };
 
 export default function ServicesPage() {

@@ -60,7 +60,7 @@ jobs:
 
             echo "Production environment file created."
 
-      - name: Build and deploy via SSH
+      - name: Deploy marketing application
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.PRODUCTION_DROPLET_IP }}
@@ -76,8 +76,7 @@ jobs:
             echo "========================================"
             echo "Building marketing application..."
             echo "========================================"
-
-            docker compose build --progress=plain marketing-site
+            docker compose build --no-cache marketing-site
 
             echo "========================================"
             echo "Deploying marketing application..."
@@ -96,54 +95,69 @@ jobs:
             echo "Waiting for application health..."
             echo "========================================"
 
-            for i in {1..36}; do
+            HEALTHY=false
+
+            for i in $(seq 1 36); do
               STATUS=$(docker inspect \
                 --format='{{.State.Health.Status}}' \
-                stackprime-marketing-site 2>/dev/null || true)
+                stackprime-marketing-site 2>/dev/null || echo "missing")
+
+              echo "Health status: $STATUS — attempt $i/36"
 
               if [ "$STATUS" = "healthy" ]; then
+                HEALTHY=true
                 echo "Application is healthy."
                 break
               fi
 
-              echo "Health status: ${STATUS:-starting} — attempt $i/36"
+              if [ "$STATUS" = "unhealthy" ]; then
+                echo "Application became unhealthy."
+                docker logs --tail 100 stackprime-marketing-site
+                exit 1
+              fi
+
               sleep 5
             done
 
-            STATUS=$(docker inspect \
-              --format='{{.State.Health.Status}}' \
-              stackprime-marketing-site 2>/dev/null || true)
-
-            if [ "$STATUS" != "healthy" ]; then
-              echo "ERROR: Application did not become healthy."
-
-              echo "===== Container status ====="
-              docker ps -a --filter "name=stackprime-marketing-site"
-
-              echo "===== Container logs ====="
-              docker logs --tail 150 stackprime-marketing-site || true
-
+            if [ "$HEALTHY" != "true" ]; then
+              echo "Application failed to become healthy."
+              docker logs --tail 100 stackprime-marketing-site
               exit 1
             fi
+
+            echo "========================================"
+            echo "Refreshing Nginx upstream DNS..."
+            echo "========================================"
+
+            docker restart stackprime-nginx
+
+            sleep 5
+
+            echo "Nginx restarted successfully."
+
+            echo "========================================"
+            echo "Checking internal application endpoint..."
+            echo "========================================"
+
+            docker exec stackprime-nginx \
+              wget -qO- http://stackprime-marketing-site:3000/api/health
+
+            echo
 
             echo "========================================"
             echo "Checking public HTTPS endpoint..."
             echo "========================================"
 
-            curl --fail \
-              --show-error \
-              --silent \
-              --retry 5 \
-              --retry-delay 5 \
-              --retry-connrefused \
-              https://stackprimeconsulting.com.ng/api/health
+            for i in $(seq 1 12); do
+              if curl -fsS https://stackprimeconsulting.com.ng/api/health; then
+                echo
+                echo "Public HTTPS endpoint is healthy."
+                break
+              fi
 
-            echo
-            echo "========================================"
-            echo "Deployment successful."
-            echo "========================================"
-
-            docker image prune -f
+              echo "Public endpoint not ready — attempt $i/12"
+              sleep 5
+            done
 
       - name: Verify public health
         uses: appleboy/ssh-action@v1.2.0
