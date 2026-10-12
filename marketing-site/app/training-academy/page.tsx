@@ -33,6 +33,7 @@ const courses = [
   },
 ];
 
+
 export default function TrainingAcademyPage() {
   return (
     <>
@@ -80,7 +81,10 @@ export default function TrainingAcademyPage() {
             <h2 className="font-serif text-2xl font-bold">Ready to enroll?</h2>
             <p className="mt-2 text-white/75">Submit your details and we&apos;ll follow up with enrollment steps.</p>
           </div>
-          <CtaButton href="/company/contact" variant="gold">
+          <CtaButton href="/company/contact" variant="gold"> 
+            Send Enquiry
+          </CtaButton>
+          <CtaButton href="https://forms.gle/SfxVgia4Vani76R99">
             Enroll Now
           </CtaButton>
         </Container>

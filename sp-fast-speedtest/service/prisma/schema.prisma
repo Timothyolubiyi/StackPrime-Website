@@ -1,0 +1,50 @@
+// SQLite, not Postgres — same reasoning as sp-vas: this runs as a container
+// on the shared 1GB Phase 1 droplet, and a file-based DB avoids running a
+// second database server for a usage-counter table this small. Revisit if
+// SP Fast Speed Test ever moves to its own droplet with real concurrency
+// needs.
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// One row per completed speed test — powers the 3-use free limit, keyed by
+// browser fingerprint AND IP (same dual-key approach as sp-vas, so a new
+// fingerprint from the same IP doesn't bypass the limit).
+model ToolUsage {
+  id          String   @id @default(cuid())
+  fingerprint String
+  ipAddress   String
+  createdAt   DateTime @default(now())
+
+  @@index([fingerprint])
+  @@index([ipAddress])
+}
+
+// Tracks total bytes served per IP per calendar day (UTC). This is the
+// bandwidth-abuse safety net sitting ALONGSIDE the 3-use limit, not instead
+// of it — the 3-use limit stops a normal visitor from running the test
+// endlessly; this stops a scripted client from bypassing that by churning
+// fingerprints while still hammering real bandwidth.
+model DailyTransfer {
+  id        String @id @default(cuid())
+  ipAddress String
+  date      String // "YYYY-MM-DD", UTC day bucket
+  bytes     Int
+
+  @@unique([ipAddress, date])
+}
+
+model SpeedTestResult {
+  id           String   @id @default(cuid())
+  usageId      String
+  downloadMbps Float
+  uploadMbps   Float
+  latencyMs    Float
+  createdAt    DateTime @default(now())
+}

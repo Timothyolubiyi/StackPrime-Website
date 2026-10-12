@@ -1,0 +1,10 @@
+domain_name = "stackprimeconsulting.com.ng"
+subdomain   = "speedtest"
+
+# Set to true ONLY if no other Terraform state has created the
+# stackprimeconsulting.com.ng zone in DigitalOcean yet. If the marketing
+# site's infra already manages it by the time you run this, leave false.
+manage_domain_resource = false
+
+# droplet_ipv4 and do_token supplied at apply time via -var or TF_VAR_ —
+# droplet_ipv4 comes from the marketing-site-infra Terraform output.

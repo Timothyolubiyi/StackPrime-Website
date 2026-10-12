@@ -1,0 +1,52 @@
+name: Deploy — SP Fast Speed Test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "service/**" # only triggers on changes to this app's own service
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy source to droplet
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.PRODUCTION_DROPLET_IP }}
+          username: deploy
+          key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          source: "service,deploy/docker-compose.yml,deploy/nginx/speedtest.conf"
+          target: "/opt/sp-fast-speedtest/app"
+          rm: true
+          overwrite: true
+
+      - name: Build and deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.PRODUCTION_DROPLET_IP }}
+          username: deploy
+          key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          script: |
+            cp /opt/sp-fast-speedtest/app/deploy/nginx/speedtest.conf /opt/stackprime-marketing-site/nginx/conf.d/speedtest.conf
+            docker exec stackprime-nginx nginx -s reload || true
+
+            cd /opt/sp-fast-speedtest
+            cp app/deploy/docker-compose.yml .
+            cp -r app/service ./service
+            docker compose build
+            docker compose up -d
+            docker image prune -f
+
+      - name: Verify health
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.PRODUCTION_DROPLET_IP }}
+          username: deploy
+          key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          script: |
+            sleep 5
+            curl -sf https://speedtest.stackprimeconsulting.com.ng/api/health || (echo "Health check failed" && exit 1)

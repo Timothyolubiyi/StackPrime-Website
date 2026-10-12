@@ -1,0 +1,43 @@
+# Deployed at /opt/sp-fast-speedtest/docker-compose.yml on the shared
+# droplet. Own compose file (not merged into the marketing site's or
+# sp-vas's) so it can be deployed, restarted, or torn down independently —
+# same app-by-app isolation pattern as sp-vas. Builds directly on the
+# droplet (no Container Registry), matching the lean setup.
+
+services:
+  sp-fast-speedtest:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sp-fast-speedtest
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - sp-fast-speedtest-data:/app/data
+      - sp-fast-speedtest-reports:/app/reports
+    expose:
+      - "4002"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:4002/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - shared_nginx_net
+
+volumes:
+  sp-fast-speedtest-data:
+  sp-fast-speedtest-reports:
+
+networks:
+  # Same shared network sp-vas already joined with the marketing site's
+  # Nginx container — created once via `docker network create shared_nginx_net`.
+  # No new setup needed here if sp-vas is already deployed.
+  shared_nginx_net:
+    external: true
