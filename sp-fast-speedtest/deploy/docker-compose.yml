@@ -7,7 +7,7 @@
 services:
   sp-fast-speedtest:
     build:
-      context: .
+      context: ./service
       dockerfile: Dockerfile
     container_name: sp-fast-speedtest
     restart: unless-stopped
