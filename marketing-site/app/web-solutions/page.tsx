@@ -13,7 +13,8 @@ const tools = [
   {
     name: "SP Fast Speed Test",
     description: "Check your network's real-world speed and latency — the same measurement engine behind SP Fast Enterprise.",
-    status: "coming-soon" as const,
+    status: "live" as const,
+    href: "/web-solutions/sp-fast-speedtest",
   },
   {
     name: "SP VAS — Vulnerability Assessment",
