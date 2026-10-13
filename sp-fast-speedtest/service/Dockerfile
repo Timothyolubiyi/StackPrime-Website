@@ -6,7 +6,7 @@ RUN apk add --no-cache openssl
 
 FROM base AS deps
 COPY package.json package-lock.json* ./
-RUN npm install --omit=dev=false
+RUN npm install
 
 FROM base AS build
 COPY --from=deps /app/node_modules ./node_modules
@@ -18,7 +18,7 @@ FROM base AS runner
 ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs \
   && adduser --system --uid 1001 spfast
-COPY --from=deps /app/node_modules ./node_modules
+COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/assets ./assets
