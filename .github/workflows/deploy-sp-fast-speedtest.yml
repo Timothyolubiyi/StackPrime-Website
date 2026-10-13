@@ -70,11 +70,23 @@ jobs:
             docker compose up -d sp-fast-speedtest
 
             echo "Waiting for backend container..."
-            sleep 5
             docker ps --filter name=sp-fast-speedtest
 
-            echo "Checking backend health from inside its container..."
-            docker exec sp-fast-speedtest wget -q -O- http://127.0.0.1:4002/api/health
+            echo "Checking backend health with retries..."
+            for attempt in 1 2 3 4 5 6 7 8 9 10; do
+              if docker exec sp-fast-speedtest wget -q -O- --timeout=5 http://127.0.0.1:4002/api/health; then
+                echo
+                echo "Internal backend health check passed."
+                exit 0
+              fi
+
+              echo "Attempt $attempt failed; waiting 3 seconds..."
+              sleep 3
+            done
+
+            echo "Backend health check failed after 10 attempts."
+            docker logs --tail 100 sp-fast-speedtest
+            exit 1
 
       - name: Install Nginx virtual host and reload safely
         uses: appleboy/ssh-action@v1.2.0
