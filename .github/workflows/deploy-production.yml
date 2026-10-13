@@ -57,6 +57,7 @@ jobs:
             NEXT_PUBLIC_SITE_URL=https://stackprimeconsulting.com.ng
             NEXT_PUBLIC_ASSETS_CDN_URL=
             NEXT_PUBLIC_VAS_API_URL=https://vas.stackprimeconsulting.com.ng
+            NEXT_PUBLIC_SP_FAST_SPEEDTEST_API_URL=https://speedtest.stackprimeconsulting.com.ng
             EOF
 
             echo "Production environment file created."
