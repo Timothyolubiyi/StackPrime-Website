@@ -31,6 +31,6 @@ EXPOSE 4002
 ENV PORT=4002
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD wget --quiet --tries=1 --spider http://localhost:4002/api/health || exit 1
+  CMD wget --quiet --tries=1 --spider http://127.0.0.1:4002/api/health || exit 1
 
 CMD ["sh", "-c", "npx prisma migrate deploy && node dist/server.js"]
