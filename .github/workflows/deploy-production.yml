@@ -71,95 +71,113 @@ jobs:
           timeout: 60s
           command_timeout: 25m
           script: |
-            set -e
+           set -e
 
-            cd /opt/stackprime-marketing-site/app
+           cd /opt/stackprime-marketing-site/app
 
-            echo "========================================"
-            echo "Building marketing application..."
-            echo "========================================"
-            docker compose build --no-cache marketing-site
+           echo "========================================"
+           echo "Building marketing application..."
+           echo "========================================"
 
-            echo "========================================"
-            echo "Deploying marketing application..."
-            echo "========================================"
+           docker compose build --no-cache marketing-site
 
-            echo "Stopping existing marketing container..."
-            docker stop stackprime-marketing-site 2>/dev/null || true
+           echo "========================================"
+           echo "Deploying marketing application..."
+           echo "========================================"
 
-            echo "Removing existing marketing container..."
-            docker rm -f stackprime-marketing-site 2>/dev/null || true
+           docker compose up -d --no-deps --force-recreate marketing-site
 
-            echo "Starting new marketing container..."
-            docker compose up -d --no-deps marketing-site
+           echo "========================================"
+           echo "Identifying marketing container..."
+           echo "========================================"
 
-            echo "========================================"
-            echo "Waiting for application health..."
-            echo "========================================"
+           CID=$(docker compose ps -q marketing-site)
 
-            HEALTHY=false
+           if [ -z "$CID" ]; then
+             echo "ERROR: Marketing container was not found."
+             docker compose ps -a
+             exit 1
+           fi
 
-            for i in $(seq 1 36); do
-              STATUS=$(docker inspect \
-                --format='{{.State.Health.Status}}' \
-                stackprime-marketing-site 2>/dev/null || echo "missing")
+           echo "Marketing container ID: $CID"
 
-              echo "Health status: $STATUS — attempt $i/36"
+           echo "========================================"
+           echo "Waiting for application health..."
+           echo "========================================"
 
-              if [ "$STATUS" = "healthy" ]; then
-                HEALTHY=true
-                echo "Application is healthy."
-                break
-              fi
+           HEALTHY=false
 
-              if [ "$STATUS" = "unhealthy" ]; then
-                echo "Application became unhealthy."
-                docker logs --tail 100 stackprime-marketing-site
-                exit 1
-              fi
+           for i in $(seq 1 36); do
+             STATUS=$(docker inspect \
+               --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}no-healthcheck{{end}}' \
+               "$CID")
 
-              sleep 5
-            done
+             echo "Health status: $STATUS — attempt $i/36"
 
-            if [ "$HEALTHY" != "true" ]; then
-              echo "Application failed to become healthy."
-              docker logs --tail 100 stackprime-marketing-site
-              exit 1
-            fi
+             if [ "$STATUS" = "healthy" ]; then
+               HEALTHY=true
+               echo "Application is healthy."
+               break
+             fi
 
-            echo "========================================"
-            echo "Refreshing Nginx upstream DNS..."
-            echo "========================================"
+             if [ "$STATUS" = "unhealthy" ]; then
+               echo "Application became unhealthy."
+               docker logs --tail 100 "$CID"
+               exit 1
+             fi
 
-            docker restart stackprime-nginx
+             sleep 5
+           done
 
-            sleep 5
+           if [ "$HEALTHY" != "true" ]; then
+             echo "Application failed to become healthy."
+             docker logs --tail 100 "$CID"
+             exit 1
+           fi
 
-            echo "Nginx restarted successfully."
+           echo "========================================"
+           echo "Validating and reloading Nginx..."
+           echo "========================================"
 
-            echo "========================================"
-            echo "Checking internal application endpoint..."
-            echo "========================================"
+           docker exec stackprime-nginx nginx -t
+           docker exec stackprime-nginx nginx -s reload
 
-            docker exec stackprime-nginx \
-              wget -qO- http://stackprime-marketing-site:3000/api/health
+           echo "Nginx configuration validated and reloaded."
 
-            echo
+           echo "========================================"
+           echo "Checking internal application endpoint..."
+           echo "========================================"
 
-            echo "========================================"
-            echo "Checking public HTTPS endpoint..."
-            echo "========================================"
+           docker exec stackprime-nginx \
+             wget -qO- http://stackprime-marketing-site:3000/api/health
 
-            for i in $(seq 1 12); do
-              if curl -fsS https://stackprimeconsulting.com.ng/api/health; then
-                echo
-                echo "Public HTTPS endpoint is healthy."
-                break
-              fi
+           echo
 
-              echo "Public endpoint not ready — attempt $i/12"
-              sleep 5
-            done
+           echo "========================================"
+           echo "Checking public HTTPS endpoint..."
+           echo "========================================"
+
+           PUBLIC_HEALTHY=false
+
+           for i in $(seq 1 12); do
+             if curl -fsS https://stackprimeconsulting.com.ng/api/health; then
+               echo
+               PUBLIC_HEALTHY=true
+               break
+             fi
+
+             echo "Public endpoint not ready — attempt $i/12"
+             sleep 5
+           done
+
+           if [ "$PUBLIC_HEALTHY" != "true" ]; then
+             echo "ERROR: Public HTTPS health check failed."
+             docker compose ps -a
+             docker logs --tail 100 "$CID"
+             exit 1
+           fi
+
+           echo "Public HTTPS endpoint is healthy."
 
       - name: Verify public health
         uses: appleboy/ssh-action@v1.2.0
@@ -172,9 +190,11 @@ jobs:
           script: |
             set -e
 
+            cd /opt/stackprime-marketing-site/app
+
             echo "Verifying public HTTPS health endpoint..."
 
-            for i in {1..30}; do
+            for i in $(seq 1 30); do
               if curl -sf \
                 --retry 2 \
                 --retry-delay 2 \
@@ -192,10 +212,10 @@ jobs:
 
             echo "✗ Health check failed after 60 seconds."
 
-            echo "===== Docker containers ====="
-            docker ps -a
+            echo "===== Marketing Compose containers ====="
+            docker compose ps -a
 
             echo "===== Marketing application logs ====="
-            docker logs --tail 100 stackprime-marketing-site || true
+            docker compose logs --tail 100 marketing-site || true
 
             exit 1
