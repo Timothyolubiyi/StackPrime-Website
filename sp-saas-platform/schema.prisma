@@ -1,0 +1,377 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────── Enums ─────────────
+
+enum Role {
+  ORG_OWNER
+  BILLING_ADMIN
+  IT_ADMIN
+  STANDARD_USER
+  AUDITOR
+}
+
+// ANDROID / IOS are reserved for the Phase 4 mobile addendum and are NOT exposed by Phase 3 routes.
+enum Platform {
+  WINDOWS
+  MACOS
+  LINUX_DEB
+  LINUX_RPM
+  LINUX_TAR
+  CONTAINER
+  ANDROID
+  IOS
+}
+
+enum Arch {
+  X64
+  ARM64
+  UNIVERSAL
+}
+
+enum BillingModel {
+  SUBSCRIPTION
+  PERPETUAL
+}
+
+enum BillingInterval {
+  MONTH
+  YEAR
+  ONE_TIME
+}
+
+enum EntitlementStatus {
+  PENDING
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum EntitlementSource {
+  STRIPE
+  PO_INVOICE
+  MANUAL
+}
+
+enum PurchaseOrderStatus {
+  REQUESTED
+  INVOICED
+  PAID
+  REJECTED
+}
+
+enum DeviceStatus {
+  ACTIVE
+  REVOKED
+}
+
+enum EmailTokenType {
+  VERIFY_EMAIL
+  RESET_PASSWORD
+}
+
+// ───────────── Identity ─────────────
+
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  name            String?
+  passwordHash    String
+  emailVerifiedAt DateTime?
+  mfaSecretEnc    String? // AES-256-GCM encrypted TOTP secret
+  mfaEnabled      Boolean   @default(false)
+  isStaff         Boolean   @default(false) // StackPrime internal admin
+  roles           Role[]    @default([])
+  orgId           String?
+  org             Org?      @relation(fields: [orgId], references: [id])
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  sessions     Session[]
+  emailTokens  EmailToken[]
+  entitlements Entitlement[]
+  downloads    Download[]
+
+  @@index([orgId])
+}
+
+model EmailToken {
+  id        String         @id @default(cuid())
+  userId    String
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      EmailTokenType
+  tokenHash String         @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime       @default(now())
+
+  @@index([userId, type])
+}
+
+// One row per logged-in browser/device. refreshHash rotates on every use;
+// prevRefreshHash lets us detect reuse of a stolen, already-rotated token.
+model Session {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshHash     String
+  prevRefreshHash String?
+  userAgent       String?
+  ip              String?
+  createdAt       DateTime  @default(now())
+  lastUsedAt      DateTime  @default(now())
+  expiresAt       DateTime
+  revokedAt       DateTime?
+
+  @@index([userId])
+}
+
+// ───────────── Organisations ─────────────
+
+model Org {
+  id               String   @id @default(cuid())
+  name             String
+  mfaRequired      Boolean  @default(false)
+  stripeCustomerId String?  @unique
+  createdAt        DateTime @default(now())
+
+  members        User[]
+  invites        Invite[]
+  entitlements   Entitlement[]
+  purchaseOrders PurchaseOrder[]
+  apiKeys        ApiKey[]
+  devices        Device[]
+  enrolTokens    EnrolmentToken[]
+}
+
+model Invite {
+  id         String    @id @default(cuid())
+  orgId      String
+  org        Org       @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  email      String
+  roles      Role[]
+  tokenHash  String    @unique
+  invitedBy  String
+  expiresAt  DateTime
+  acceptedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([orgId])
+  @@index([email])
+}
+
+// ───────────── Catalog ─────────────
+
+model Product {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  tagline     String?
+  description String
+  launchUrl   String? // free-tool URL (see scope §5.5 on tools. vs vas./speedtest.)
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  plans          Plan[]
+  versions       Version[]
+  entitlements   Entitlement[]
+  devices        Device[]
+  enrolTokens    EnrolmentToken[]
+  purchaseOrders PurchaseOrder[]
+}
+
+// Pricing is intentionally nullable: scope §10.5 says pricing is not yet decided.
+model Plan {
+  id            String          @id @default(cuid())
+  productId     String
+  product       Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  code          String // e.g. "premium-monthly"
+  name          String
+  billingModel  BillingModel
+  interval      BillingInterval
+  endpointLimit Int? // null = not endpoint-limited
+  priceMinor    Int? // minor units (cents/kobo)
+  currency      String?
+  stripePriceId String?         @unique
+  isActive      Boolean         @default(true)
+
+  entitlements   Entitlement[]
+  purchaseOrders PurchaseOrder[]
+
+  @@unique([productId, code])
+}
+
+model Version {
+  id           String    @id @default(cuid())
+  productId    String
+  product      Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  version      String // semver, immutable once published
+  changelog    String?
+  minSupported Boolean   @default(false) // agents older than the newest minSupported version are told to update
+  publishedAt  DateTime?
+  createdAt    DateTime  @default(now())
+
+  artifacts Artifact[]
+
+  @@unique([productId, version])
+}
+
+model Artifact {
+  id         String   @id @default(cuid())
+  versionId  String
+  version    Version  @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  platform   Platform
+  arch       Arch
+  filename   String
+  storageKey String // object key in the PRIVATE Spaces bucket
+  sha256     String
+  sizeBytes  BigInt
+  createdAt  DateTime @default(now())
+
+  downloads Download[]
+
+  @@unique([versionId, platform, arch])
+}
+
+// ───────────── Entitlements & billing ─────────────
+
+model Entitlement {
+  id                   String            @id @default(cuid())
+  orgId                String?
+  org                  Org?              @relation(fields: [orgId], references: [id])
+  userId               String?
+  user                 User?             @relation(fields: [userId], references: [id])
+  productId            String
+  product              Product           @relation(fields: [productId], references: [id])
+  planId               String
+  plan                 Plan              @relation(fields: [planId], references: [id])
+  status               EntitlementStatus @default(PENDING)
+  source               EntitlementSource
+  endpointLimit        Int? // overrides plan.endpointLimit when set (PO / manual deals)
+  startsAt             DateTime          @default(now())
+  expiresAt            DateTime?
+  stripeSubscriptionId String?           @unique
+  stripePaymentIntent  String?           @unique
+  licenseKey           String?           @unique // perpetual licences
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  // Exactly one of orgId / userId must be set (enforced by CHECK in sql/constraints.sql)
+  @@index([orgId, productId, status])
+  @@index([userId, productId, status])
+}
+
+model PurchaseOrder {
+  id            String              @id @default(cuid())
+  orgId         String
+  org           Org                 @relation(fields: [orgId], references: [id])
+  productId     String
+  product       Product             @relation(fields: [productId], references: [id])
+  planId        String
+  plan          Plan                @relation(fields: [planId], references: [id])
+  quantity      Int                 @default(1) // endpoints requested
+  reference     String? // client's PO number
+  notes         String?
+  status        PurchaseOrderStatus @default(REQUESTED)
+  requestedById String
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  @@index([orgId])
+  @@index([status])
+}
+
+// Idempotency: each Stripe event id is processed once.
+model StripeEvent {
+  id         String   @id // evt_...
+  type       String
+  receivedAt DateTime @default(now())
+}
+
+model Download {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  orgId      String?
+  artifactId String
+  artifact   Artifact @relation(fields: [artifactId], references: [id])
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([orgId])
+}
+
+// ───────────── API keys, devices ─────────────
+
+model ApiKey {
+  id          String    @id @default(cuid())
+  orgId       String
+  org         Org       @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  createdById String
+  name        String
+  prefix      String // first chars, for display
+  keyHash     String    @unique // sha256 of the full key; plaintext shown once
+  roles       Role[]
+  lastUsedAt  DateTime?
+  revokedAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([orgId])
+}
+
+model EnrolmentToken {
+  id          String    @id @default(cuid())
+  orgId       String
+  org         Org       @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id])
+  createdById String
+  tokenHash   String    @unique
+  expiresAt   DateTime
+  usedAt      DateTime?
+  createdAt   DateTime  @default(now())
+}
+
+model Device {
+  id           String       @id @default(cuid())
+  orgId        String
+  org          Org          @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  productId    String
+  product      Product      @relation(fields: [productId], references: [id])
+  platform     Platform
+  arch         Arch
+  hostname     String
+  agentVersion String
+  secretHash   String // sha256 of the device secret; plaintext returned once at enrolment
+  status       DeviceStatus @default(ACTIVE)
+  lastSeenAt   DateTime?
+  createdAt    DateTime     @default(now())
+  revokedAt    DateTime?
+
+  @@index([orgId, productId, status])
+}
+
+// ───────────── Audit (append-only) ─────────────
+
+model AuditLog {
+  id         BigInt   @id @default(autoincrement())
+  at         DateTime @default(now())
+  orgId      String?
+  actorId    String?
+  action     String
+  targetType String?
+  targetId   String?
+  ip         String?
+  meta       Json?
+
+  @@index([orgId, at])
+  @@index([actorId])
+}

@@ -1,0 +1,111 @@
+﻿name: SP SaaS - Frontend Deploy (production)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'stackprime-phase3/sp-saas-platform/frontend/**'
+      - '.github/workflows/sp-saas-frontend-deploy.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sp-saas-frontend-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    env:
+      HOST: ${{ secrets.SAAS_HOST }}
+
+    defaults:
+      run:
+        working-directory: stackprime-phase3/sp-saas-platform/frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: stackprime-phase3/sp-saas-platform/frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Validate build output
+        run: |
+          test -s dist/index.html
+          test -d dist/assets
+          echo "Frontend build validated."
+
+      - name: Package frontend
+        run: tar -czf "$RUNNER_TEMP/sp-saas-frontend.tar.gz" -C dist .
+
+      - name: Configure SSH
+        working-directory: .
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.SAAS_SSH_KEY }}" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          printf '%s\n' "${{ secrets.SAAS_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          printf 'Host saas\n  HostName %s\n  User deploy\n  IdentityFile ~/.ssh/id_deploy\n  StrictHostKeyChecking yes\n' "$HOST" > ~/.ssh/config
+
+      - name: Upload frontend archive
+        working-directory: .
+        run: |
+          scp "$RUNNER_TEMP/sp-saas-frontend.tar.gz" \
+            "saas:/tmp/sp-saas-frontend-${GITHUB_RUN_ID}.tar.gz"
+
+      - name: Publish frontend
+        working-directory: .
+        run: |
+          ssh saas "RUN_ID=${GITHUB_RUN_ID} bash -s" <<'REMOTE'
+          set -euo pipefail
+
+          BASE=/opt/sp-saas/deploy
+          WEB="$BASE/web-dist"
+          STAGE="$BASE/frontend-release-$RUN_ID"
+          ARCHIVE="/tmp/sp-saas-frontend-$RUN_ID.tar.gz"
+
+          mkdir -p "$WEB" "$STAGE"
+          tar -xzf "$ARCHIVE" -C "$STAGE"
+
+          test -s "$STAGE/index.html"
+          test -d "$STAGE/assets"
+
+          # Publish assets and other static files first.
+          find "$STAGE" -mindepth 1 -maxdepth 1 ! -name index.html \
+            -exec cp -a {} "$WEB/" \;
+
+          # Publish the entry point last.
+          cp "$STAGE/index.html" "$WEB/index.html"
+
+          test -s "$WEB/index.html"
+
+          rm -rf "$STAGE" "$ARCHIVE"
+          echo "Frontend published successfully."
+          REMOTE
+
+      - name: Verify public HTTPS application
+        working-directory: .
+        run: |
+          for path in / /login /register; do
+            echo "Checking https://${HOST}${path}"
+            curl --fail --silent --show-error \
+              "https://${HOST}${path}" -o /tmp/sp-frontend-check.html
+            grep -qi '<html' /tmp/sp-frontend-check.html
+          done
+
+          echo "Public HTTPS frontend checks passed."
