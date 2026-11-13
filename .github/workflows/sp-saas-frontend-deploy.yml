@@ -1,4 +1,4 @@
-﻿name: SP SaaS - Frontend Deploy (production)
+name: SP SaaS - Frontend Deploy (production)
 
 on:
   push:
@@ -35,6 +35,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
+          cache-dependency-path: stackprime-phase3/sp-saas-platform/frontend/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -53,11 +55,17 @@ jobs:
 
       - name: Configure SSH
         working-directory: .
+        env:
+          SAAS_SSH_KEY: ${{ secrets.SAAS_SSH_KEY }}
+          SAAS_KNOWN_HOSTS: ${{ secrets.SAAS_KNOWN_HOSTS }}
         run: |
+          test -n "$HOST"
+          test -n "$SAAS_SSH_KEY"
+          test -n "$SAAS_KNOWN_HOSTS"
           install -m 700 -d ~/.ssh
-          printf '%s\n' "${{ secrets.SAAS_SSH_KEY }}" > ~/.ssh/id_deploy
+          printf '%s\n' "$SAAS_SSH_KEY" > ~/.ssh/id_deploy
           chmod 600 ~/.ssh/id_deploy
-          printf '%s\n' "${{ secrets.SAAS_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          printf '%s\n' "$SAAS_KNOWN_HOSTS" > ~/.ssh/known_hosts
           printf 'Host saas\n  HostName %s\n  User deploy\n  IdentityFile ~/.ssh/id_deploy\n  StrictHostKeyChecking yes\n' "$HOST" > ~/.ssh/config
 
       - name: Upload frontend archive
@@ -83,13 +91,10 @@ jobs:
           test -s "$STAGE/index.html"
           test -d "$STAGE/assets"
 
-          # Publish assets and other static files first.
           find "$STAGE" -mindepth 1 -maxdepth 1 ! -name index.html \
             -exec cp -a {} "$WEB/" \;
 
-          # Publish the entry point last.
           cp "$STAGE/index.html" "$WEB/index.html"
-
           test -s "$WEB/index.html"
 
           rm -rf "$STAGE" "$ARCHIVE"
@@ -99,13 +104,10 @@ jobs:
       - name: Verify public HTTPS application
         working-directory: .
         run: |
-          for path in / /login /register; do
+          for path in / /login /signup /verify-email; do
             echo "Checking https://${HOST}${path}"
             curl --fail --silent --show-error \
               "https://${HOST}${path}" -o /tmp/sp-frontend-check.html
             grep -qi '<html' /tmp/sp-frontend-check.html
           done
-
           echo "Public HTTPS frontend checks passed."
-
-

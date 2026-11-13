@@ -1,56 +1,93 @@
-import type { Me } from './types';
-
-const API = '/v1';
-let accessToken: string | null = null;
-let refreshPromise: Promise<boolean> | null = null;
-
-export function setAccessToken(token: string | null) { accessToken = token; }
-
-async function refreshAccess(): Promise<boolean> {
-  if (!refreshPromise) {
-    refreshPromise = (async () => {
-      try {
-        const res = await fetch(`${API}/auth/refresh`, {
-          method: 'POST', credentials: 'include',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        if (!res.ok) return false;
-        const data = await res.json();
-        accessToken = data.accessToken;
-        return Boolean(accessToken);
-      } catch { return false; }
-      finally { refreshPromise = null; }
-    })();
-  }
-  return refreshPromise;
-}
+// The browser talks to the API on the same origin (/v1/...). The short-lived access token lives only in
+// memory (never localStorage); the long-lived refresh token is an httpOnly cookie the page cannot read.
 
 export class ApiError extends Error {
-  status: number;
-  code?: string;
-  constructor(status: number, code: string | undefined, message: string) {
-    super(message); this.status = status; this.code = code;
+  constructor(
+    public status: number,
+    public code: string,
+    message: string,
+    public issues: { path: string; message: string }[] = [],
+  ) {
+    super(message);
   }
 }
 
-export async function api<T>(path: string, init: RequestInit = {}, retry = true): Promise<T> {
-  const headers = new Headers(init.headers);
-  if (init.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
-  if (accessToken) headers.set('Authorization', `Bearer ${accessToken}`);
-  const response = await fetch(`${API}${path}`, { ...init, headers, credentials: 'include' });
-  if (response.status === 401 && retry && !path.startsWith('/auth/')) {
-    if (await refreshAccess()) return api<T>(path, init, false);
-  }
-  const raw = await response.text();
-  let data: any = null;
-  try { data = raw ? JSON.parse(raw) : null; } catch { data = raw; }
-  if (!response.ok) {
-    throw new ApiError(response.status, data?.code, data?.message || `Request failed (${response.status}).`);
-  }
-  return data as T;
+let token: string | null = null;
+let signedOutHandler: (() => void) | null = null;
+export const setToken = (t: string | null) => {
+  token = t;
+};
+export const onSignedOut = (fn: () => void) => {
+  signedOutHandler = fn;
+};
+
+interface Opts {
+  method?: string;
+  body?: unknown;
+  auth?: boolean; // send the access token (default true)
 }
 
-export async function loadMe(): Promise<Me> {
-  return api<Me>('/me');
+async function send<T>(path: string, o: Opts): Promise<T> {
+  const headers: Record<string, string> = {};
+  if (o.body !== undefined) headers['Content-Type'] = 'application/json';
+  if (o.auth !== false && token) headers.Authorization = `Bearer ${token}`;
+
+  let res: Response;
+  try {
+    res = await fetch(path, {
+      method: o.method ?? 'GET',
+      headers,
+      body: o.body === undefined ? undefined : JSON.stringify(o.body),
+      credentials: 'same-origin',
+    });
+  } catch {
+    throw new ApiError(0, 'NETWORK', 'Could not reach the server. Check your connection and try again.');
+  }
+  if (res.status === 204) return undefined as T;
+  const json = (await res.json().catch(() => null)) as { code?: string; message?: string; issues?: { path: string; message: string }[] } | null;
+  if (!res.ok) throw new ApiError(res.status, json?.code ?? 'ERROR', json?.message ?? 'Something went wrong.', json?.issues ?? []);
+  return json as T;
 }
-export function clearAuth() { accessToken = null; }
+
+// One refresh at a time, shared by everything that needs it.
+let refreshing: Promise<boolean> | null = null;
+export function refreshSession(): Promise<boolean> {
+  if (!refreshing) {
+    refreshing = (async () => {
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          const r = await send<{ accessToken: string }>('/v1/auth/refresh', { method: 'POST', auth: false, body: {} });
+          token = r.accessToken;
+          return true;
+        } catch (e) {
+          // Another tab rotated the cookie a moment ago; the browser already holds the new one. Try again.
+          if (e instanceof ApiError && e.code === 'REFRESH_RACE' && attempt === 0) {
+            await new Promise((r) => setTimeout(r, 400));
+            continue;
+          }
+          break;
+        }
+      }
+      token = null;
+      return false;
+    })().finally(() => {
+      refreshing = null;
+    });
+  }
+  return refreshing;
+}
+
+export async function api<T = unknown>(path: string, o: Opts = {}): Promise<T> {
+  try {
+    return await send<T>(path, o);
+  } catch (e) {
+    if (e instanceof ApiError && e.status === 401 && e.code === 'UNAUTHENTICATED' && o.auth !== false) {
+      if (await refreshSession()) return send<T>(path, o);
+      signedOutHandler?.();
+    }
+    throw e;
+  }
+}
+
+export const errText = (e: unknown): string => (e instanceof ApiError ? e.message : 'Something went wrong. Try again.');
+export const errCode = (e: unknown): string => (e instanceof ApiError ? e.code : '');

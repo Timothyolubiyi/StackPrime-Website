@@ -123,21 +123,15 @@ export default function SaasProductsPage() {
                   Run a Free Assessment
                 </a>
                 <a
-                  href="/company/contact"
+                  href="https://app.stackprimeconsulting.com.ng/signup"
                   className="inline-flex items-center justify-center rounded-full border border-gray-200 px-6 py-3 text-sm font-semibold text-ink hover:bg-[#F7F8FA]"
                 >
-                  Ask About Premium
+                  Subscribe to Premium
                 </a>
               </div>
             </div>
           </div>
 
-          <div className="mt-6 rounded-lg border border-gray-100 bg-[#F7F8FA] p-8 text-center">
-            <h3 className="font-serif text-xl font-semibold text-navy">More products coming to the catalog</h3>
-            <p className="mt-2 text-muted">
-              SP Fast Speed Test and additional tools will appear here as they launch.
-            </p>
-          </div>
         </Container>
       </section>
 

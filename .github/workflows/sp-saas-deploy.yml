@@ -1,0 +1,137 @@
+name: SP SaaS - Deploy (production)
+
+on:
+  workflow_run:
+    workflows: ['SP SaaS - CI']
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sp-saas-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    environment: production
+
+    env:
+      REGISTRY_NS: ${{ secrets.DO_REGISTRY_NAMESPACE }}
+      HOST: ${{ secrets.SAAS_HOST }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Validate deployment configuration
+        run: |
+          test -n "$REGISTRY_NS"
+          test -n "$HOST"
+          echo "Deployment configuration present."
+
+      - name: Compute image tag
+        run: echo "TAG=app-prod-$(git rev-parse --short=7 HEAD)" >> "$GITHUB_ENV"
+
+      - name: Authenticate with DigitalOcean
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DO_TOKEN }}
+
+      - name: Build and push API image
+        run: |
+          doctl registries login "$REGISTRY_NS" --expiry-seconds 900
+          IMAGE="registry.digitalocean.com/${REGISTRY_NS}/sp-saas-api"
+          docker build -t "${IMAGE}:${TAG}" stackprime-phase3/sp-saas-platform/api
+          docker push "${IMAGE}:${TAG}"
+
+      - name: Configure SSH
+        env:
+          SAAS_SSH_KEY: ${{ secrets.SAAS_SSH_KEY }}
+          SAAS_KNOWN_HOSTS: ${{ secrets.SAAS_KNOWN_HOSTS }}
+        run: |
+          test -n "$SAAS_SSH_KEY"
+          test -n "$SAAS_KNOWN_HOSTS"
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SAAS_SSH_KEY" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          printf '%s\n' "$SAAS_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          printf 'Host saas\n  HostName %s\n  User deploy\n  IdentityFile ~/.ssh/id_deploy\n  StrictHostKeyChecking yes\n' "$HOST" > ~/.ssh/config
+
+      - name: Transfer short-lived registry credentials
+        run: |
+          doctl registries docker-config "$REGISTRY_NS" --expiry-seconds=900 > /tmp/dockercfg.json
+          ssh saas 'mkdir -p ~/.docker && umask 077 && cat > ~/.docker/config.json' < /tmp/dockercfg.json
+          rm -f /tmp/dockercfg.json
+
+      - name: Sync production Compose and Nginx configuration
+        run: |
+          scp stackprime-phase3/sp-saas-platform/deploy/docker-compose.yml \
+            saas:/opt/sp-saas/deploy/docker-compose.yml
+          scp stackprime-phase3/sp-saas-platform/deploy/nginx/app.conf \
+            saas:/opt/sp-saas/deploy/nginx/app.conf
+
+      - name: Roll out API with readiness check and rollback
+        run: |
+          ssh saas "TAG=${TAG} bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          cd /opt/sp-saas/deploy
+
+          test -f .env
+          grep -q '^API_TAG=' .env
+
+          PREVIOUS="$(grep '^API_TAG=' .env | tail -n 1 | cut -d= -f2-)"
+          test -n "$PREVIOUS"
+
+          echo "Previous API tag: $PREVIOUS"
+
+          ROLLBACK_ARMED=0
+
+          rollback() {
+            STATUS=$?
+            trap - EXIT
+
+            if [ "$STATUS" -ne 0 ] && [ "$ROLLBACK_ARMED" -eq 1 ]; then
+              echo "Deployment failed. Restoring previous API image: $PREVIOUS" >&2
+              sed -i "s/^API_TAG=.*/API_TAG=${PREVIOUS}/" .env
+              docker compose up -d --no-deps api || \
+                echo "WARNING: Automatic API rollback failed; manual recovery required." >&2
+            fi
+
+            exit "$STATUS"
+          }
+
+          trap rollback EXIT
+
+          ROLLBACK_ARMED=1
+          sed -i "s/^API_TAG=.*/API_TAG=${TAG}/" .env
+
+          docker compose pull api
+          docker compose up -d postgres redis
+
+          docker compose run --rm api npx prisma migrate deploy
+          docker compose run --rm api npx prisma db execute --file prisma/sql/constraints.sql --schema prisma/schema.prisma
+          docker compose run --rm api npx prisma db execute --file prisma/sql/audit_immutable.sql --schema prisma/schema.prisma
+
+          docker compose up -d api nginx
+
+          for i in $(seq 1 12); do
+            if docker compose exec -T api wget -qO- http://127.0.0.1:4000/readyz | grep -q ready; then
+              echo "API readiness check passed."
+              ROLLBACK_ARMED=0
+              trap - EXIT
+              docker image prune -f >/dev/null
+              exit 0
+            fi
+            sleep 5
+          done
+
+          echo "API readiness failed." >&2
+          exit 1
+          REMOTE
