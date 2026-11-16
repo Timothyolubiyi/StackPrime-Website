@@ -1,6 +1,7 @@
 name: SP SaaS - CI
 
 on:
+  workflow_dispatch: {}
   pull_request:
     paths:
       - 'stackprime-phase3/sp-saas-platform/**'
