@@ -86,10 +86,18 @@ jobs:
           test -f .env
           grep -q '^API_TAG=' .env
 
+
           PREVIOUS="$(grep '^API_TAG=' .env | tail -n 1 | cut -d= -f2-)"
           test -n "$PREVIOUS"
 
+          PREVIOUS_CONTAINER="$(docker compose ps -q api)"
+          test -n "$PREVIOUS_CONTAINER"
+
+          PREVIOUS_IMAGE_ID="$(docker inspect "$PREVIOUS_CONTAINER" --format '{{.Image}}')"
+          test -n "$PREVIOUS_IMAGE_ID"
+
           echo "Previous API tag: $PREVIOUS"
+          echo "Previous API image: $PREVIOUS_IMAGE_ID"
 
           ROLLBACK_ARMED=0
 
@@ -98,18 +106,27 @@ jobs:
             trap - EXIT
 
             if [ "$STATUS" -ne 0 ] && [ "$ROLLBACK_ARMED" -eq 1 ]; then
-              echo "Deployment failed. Restoring previous API image: $PREVIOUS" >&2
+              echo "Deployment failed. Restoring previous API image." >&2
+
               sed -i "s/^API_TAG=.*/API_TAG=${PREVIOUS}/" .env
-              docker compose up -d --no-deps api || \
-                echo "WARNING: Automatic API rollback failed; manual recovery required." >&2
+
+              ROLLBACK_IMAGE="$(docker compose config --images | grep '/sp-saas-api:' | head -n 1)"
+
+              if [ -n "$ROLLBACK_IMAGE" ]; then
+                docker image tag "$PREVIOUS_IMAGE_ID" "$ROLLBACK_IMAGE"
+                docker compose up -d --no-deps --force-recreate api
+                echo "Previous API image restored."
+              else
+                echo "WARNING: Could not determine rollback image." >&2
+              fi
             fi
 
             exit "$STATUS"
           }
 
           trap rollback EXIT
-
           ROLLBACK_ARMED=1
+
           sed -i "s/^API_TAG=.*/API_TAG=${TAG}/" .env
 
           docker compose pull api
@@ -119,7 +136,31 @@ jobs:
           docker compose run --rm api npx prisma db execute --file prisma/sql/constraints.sql --schema prisma/schema.prisma
           docker compose run --rm api npx prisma db execute --file prisma/sql/audit_immutable.sql --schema prisma/schema.prisma
 
-          docker compose up -d api nginx
+          API_IMAGE="$(docker compose config --images | grep '/sp-saas-api:' | head -n 1)"
+          test -n "$API_IMAGE"
+
+          EXPECTED_IMAGE_ID="$(docker image inspect "$API_IMAGE" --format '{{.Id}}')"
+          test -n "$EXPECTED_IMAGE_ID"
+
+          echo "Expected API image: $EXPECTED_IMAGE_ID"
+
+          docker compose up -d --no-deps --force-recreate api
+
+          API_CONTAINER="$(docker compose ps -q api)"
+          test -n "$API_CONTAINER"
+
+          RUNNING_IMAGE_ID="$(docker inspect "$API_CONTAINER" --format '{{.Image}}')"
+
+          echo "Running API image: $RUNNING_IMAGE_ID"
+
+          if [ "$RUNNING_IMAGE_ID" != "$EXPECTED_IMAGE_ID" ]; then
+            echo "ERROR: Running API image does not match the deployed image." >&2
+            exit 1
+          fi
+
+          echo "API image verification passed."
+
+          docker compose up -d nginx
 
           for i in $(seq 1 12); do
             if docker compose exec -T api wget -qO- http://127.0.0.1:4000/readyz | grep -q ready; then
@@ -129,6 +170,7 @@ jobs:
               docker image prune -f >/dev/null
               exit 0
             fi
+
             sleep 5
           done
 
