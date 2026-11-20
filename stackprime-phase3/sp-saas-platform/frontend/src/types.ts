@@ -53,3 +53,21 @@ export interface AdminPlan {
 }
 export interface AdminProduct { id: string; slug: string; name: string; isActive: boolean; plans: AdminPlan[] }
 export interface AdminPurchaseOrder { id: string; status: string; org: string; orgId: string; product: string; plan: string; quantity: number; reference: string | null; notes: string | null; createdAt: string }
+
+export interface AdminVersion {
+  id: string;
+  version: string;
+  changelog: string | null;
+  minSupported: boolean;
+  published: boolean;
+  publishedAt: string | null;
+  artifacts: {
+    id: string;
+    platform: string;
+    arch: string;
+    filename: string;
+    sizeBytes: number;
+    sha256: string;
+    storageKey: string;
+  }[];
+}

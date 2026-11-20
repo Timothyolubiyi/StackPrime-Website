@@ -44,3 +44,16 @@ export const PLATFORM_LABEL: Record<string, string> = {
 };
 
 export const copyText = (t: string) => navigator.clipboard?.writeText(t).catch(() => undefined);
+
+export function bytes(n: number): string {
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(0)} KB`;
+  if (n < 1024 * 1024 * 1024) return `${(n / 1024 / 1024).toFixed(1)} MB`;
+  return `${(n / 1024 / 1024 / 1024).toFixed(2)} GB`;
+}
+
+export const ARCH_LABEL: Record<string, string> = {
+  x64: '64-bit Intel/AMD',
+  arm64: 'ARM 64-bit',
+  universal: 'Intel and Apple Silicon',
+};

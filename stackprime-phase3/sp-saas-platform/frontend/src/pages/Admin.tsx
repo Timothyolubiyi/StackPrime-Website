@@ -1,20 +1,21 @@
 import { useState, type FormEvent } from 'react';
 import { api } from '../api';
-import { fmtDate, money } from '../format';
-import type { AdminPlan, AdminProduct, AdminPurchaseOrder } from '../types';
+import { ARCH_LABEL, PLATFORM_LABEL, bytes, fmtDate, money } from '../format';
+import type { AdminPlan, AdminProduct, AdminPurchaseOrder, AdminVersion } from '../types';
 import { Badge, Button, Empty, Field, Loaded, Notice, Page, Panel, useAction, useLoad } from '../ui';
 
-type Tab = 'pricing' | 'orders' | 'access';
+type Tab = 'pricing' | 'releases' | 'orders' | 'access';
 
 export function Admin() {
   const [tab, setTab] = useState<Tab>('pricing');
-  const tabs: [Tab, string][] = [['pricing', 'Pricing'], ['orders', 'Invoice requests'], ['access', 'Grant or revoke access']];
+  const tabs: [Tab, string][] = [['pricing', 'Pricing'], ['releases', 'Releases'], ['orders', 'Invoice requests'], ['access', 'Grant or revoke access']];
   return (
     <Page title="Admin" intro="For StackPrime staff. Every change here is recorded in the audit log.">
       <div className="tabs" role="tablist">
         {tabs.map(([k, label]) => <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)}>{label}</button>)}
       </div>
       {tab === 'pricing' && <Pricing />}
+      {tab === 'releases' && <Releases />}
       {tab === 'orders' && <Orders />}
       {tab === 'access' && <Access />}
     </Page>
@@ -268,5 +269,154 @@ function Access() {
         </form>
       </Panel>
     </div>
+  );
+}
+
+const PLATFORMS = ['windows', 'macos', 'linux-deb', 'linux-rpm', 'linux-tar', 'container'];
+const ARCHES = ['x64', 'arm64', 'universal'];
+
+function Releases() {
+  const products = useLoad(() => api<{ products: AdminProduct[] }>('/v1/admin/products'), []);
+  const [slug, setSlug] = useState('');
+  const chosen = slug || products.data?.products[0]?.slug || '';
+  return (
+    <div className="stack">
+      <Notice>
+        To publish an installer: 1. Copy the file to the server with <span className="mono">upload-artifact.ps1</span> (it prints the path to use). 2. Create a draft
+        version here. 3. Add the file, choosing it again so its size and checksum are filled in for you. 4. Publish. A published version can no longer be changed.
+      </Notice>
+      <Loaded state={products}>
+        {({ products: list }) => (
+          <>
+            <Field label="Product">
+              <select value={chosen} onChange={(e) => setSlug(e.target.value)} style={{ maxWidth: '22rem' }}>
+                {list.map((p) => <option key={p.slug} value={p.slug}>{p.name}</option>)}
+              </select>
+            </Field>
+            {chosen && <ReleaseList key={chosen} slug={chosen} />}
+          </>
+        )}
+      </Loaded>
+    </div>
+  );
+}
+
+function ReleaseList({ slug }: { slug: string }) {
+  const list = useLoad(() => api<{ versions: AdminVersion[] }>(`/v1/admin/products/${slug}/versions`), [slug]);
+  const [version, setVersion] = useState('');
+  const [changelog, setChangelog] = useState('');
+  const [minSupported, setMinSupported] = useState(false);
+  const { busy, error, run } = useAction();
+
+  async function createDraft(e: FormEvent) {
+    e.preventDefault();
+    const r = await run(() => api(`/v1/admin/products/${slug}/versions`, { method: 'POST', body: { version: version.trim(), ...(changelog.trim() ? { changelog: changelog.trim() } : {}), minSupported } }));
+    if (r) { setVersion(''); setChangelog(''); setMinSupported(false); list.reload(); }
+  }
+
+  return (
+    <div className="stack">
+      <Panel title="New draft version">
+        <form className="form wide" onSubmit={createDraft}>
+          {error && <Notice kind="bad">{error}</Notice>}
+          <Field label="Version" hint="Like 1.4.0, or 1.4.0-rc.1 for a trial build."><input required value={version} onChange={(e) => setVersion(e.target.value)} style={{ maxWidth: '12rem' }} /></Field>
+          <Field label="What changed (shown to customers)"><textarea value={changelog} onChange={(e) => setChangelog(e.target.value)} maxLength={10000} /></Field>
+          <label className="check">
+            <input type="checkbox" checked={minSupported} onChange={(e) => setMinSupported(e.target.checked)} />
+            <span>Agents older than this version must update<small>Agents tell the platform their version every few minutes and are told when this applies.</small></span>
+          </label>
+          <Button type="submit" busy={busy}>Create draft</Button>
+        </form>
+      </Panel>
+      <Loaded state={list}>
+        {({ versions }) => (versions.length === 0 ? <Empty title="No versions yet" /> : <>{versions.map((v) => <VersionCard key={v.id} slug={slug} v={v} onChanged={list.reload} />)}</>)}
+      </Loaded>
+    </div>
+  );
+}
+
+function VersionCard({ slug, v, onChanged }: { slug: string; v: AdminVersion; onChanged: () => void }) {
+  const [platform, setPlatform] = useState('windows');
+  const [arch, setArch] = useState('x64');
+  const [filename, setFilename] = useState('');
+  const [sizeBytes, setSizeBytes] = useState('');
+  const [sha, setSha] = useState('');
+  const [key, setKey] = useState('');
+  const { busy, error, run } = useAction();
+
+  // Choosing the file again fills in its name, size and checksum, computed in this browser (nothing is uploaded).
+  async function inspect(file: File | undefined) {
+    if (!file) return;
+    setFilename(file.name);
+    setSizeBytes(String(file.size));
+    setKey(`${slug}/${v.version}/${file.name}`);
+    const digest = await crypto.subtle.digest('SHA-256', await file.arrayBuffer());
+    setSha([...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join(''));
+  }
+  async function addFile(e: FormEvent) {
+    e.preventDefault();
+    const r = await run(() => api(`/v1/admin/versions/${v.id}/artifacts`, { method: 'POST', body: { platform, arch, filename, storageKey: key, sha256: sha, sizeBytes: Number(sizeBytes) } }));
+    if (r) { setFilename(''); setSizeBytes(''); setSha(''); setKey(''); onChanged(); }
+  }
+  async function removeFile(id: string) {
+    const r = await run(() => api(`/v1/admin/artifacts/${id}`, { method: 'DELETE' }).then(() => true));
+    if (r) onChanged();
+  }
+  async function publish() {
+    if (!window.confirm(`Publish ${v.version}? Customers with a plan can download it straight away, and it cannot be changed afterwards.`)) return;
+    const r = await run(() => api(`/v1/admin/versions/${v.id}/publish`, { method: 'POST', body: {} }));
+    if (r) onChanged();
+  }
+  async function togglePolicy() {
+    const r = await run(() => api(`/v1/admin/versions/${v.id}`, { method: 'PATCH', body: { minSupported: !v.minSupported } }));
+    if (r) onChanged();
+  }
+
+  return (
+    <Panel title={`Version ${v.version}`} note={v.published ? `Published ${fmtDate(v.publishedAt)}` : 'Draft: not visible to customers'}>
+      <div className="row">
+        <Badge tone={v.published ? 'good' : 'warn'}>{v.published ? 'Published' : 'Draft'}</Badge>
+        {v.minSupported && <Badge>Minimum supported</Badge>}
+        <Button small kind="quiet" busy={busy} onClick={togglePolicy}>{v.minSupported ? 'Stop requiring this version' : 'Require agents to update to this version'}</Button>
+      </div>
+      {v.changelog && <p className="muted">{v.changelog}</p>}
+      {error && <Notice kind="bad">{error}</Notice>}
+      {v.artifacts.length > 0 && (
+        <div className="table-wrap">
+          <table>
+            <thead><tr><th>For</th><th>File</th><th className="num">Size</th><th>Stored at</th>{!v.published && <th />}</tr></thead>
+            <tbody>
+              {v.artifacts.map((a) => (
+                <tr key={a.id}>
+                  <td>{PLATFORM_LABEL[a.platform] ?? a.platform}<div className="small muted">{ARCH_LABEL[a.arch] ?? a.arch}</div></td>
+                  <td className="mono">{a.filename}</td>
+                  <td className="num">{bytes(a.sizeBytes)}</td>
+                  <td className="mono small">{a.storageKey}</td>
+                  {!v.published && <td><Button small kind="danger" busy={busy} onClick={() => removeFile(a.id)}>Remove</Button></td>}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {!v.published && (
+        <>
+          <form className="form wide" onSubmit={addFile}>
+            <h3>Add a file</h3>
+            <Field label="Choose the installer again" hint="Only to read its name, size and checksum."><input type="file" onChange={(e) => void inspect(e.target.files?.[0])} /></Field>
+            <div className="row">
+              <Field label="System"><select value={platform} onChange={(e) => setPlatform(e.target.value)}>{PLATFORMS.map((p) => <option key={p} value={p}>{PLATFORM_LABEL[p] ?? p}</option>)}</select></Field>
+              <Field label="Processor"><select value={arch} onChange={(e) => setArch(e.target.value)}>{ARCHES.map((a) => <option key={a} value={a}>{ARCH_LABEL[a] ?? a}</option>)}</select></Field>
+            </div>
+            <Field label="File name"><input required value={filename} onChange={(e) => setFilename(e.target.value)} /></Field>
+            <Field label="Size in bytes"><input required type="number" min={1} value={sizeBytes} onChange={(e) => setSizeBytes(e.target.value)} /></Field>
+            <Field label="SHA-256 checksum"><input required className="mono" value={sha} onChange={(e) => setSha(e.target.value)} /></Field>
+            <Field label="Stored at" hint="Where upload-artifact.ps1 put the file on the server."><input required className="mono" value={key} onChange={(e) => setKey(e.target.value)} /></Field>
+            <Button type="submit" kind="quiet" busy={busy}>Add file</Button>
+          </form>
+          <div><Button busy={busy} disabled={v.artifacts.length === 0} onClick={publish}>Publish this version</Button></div>
+        </>
+      )}
+    </Panel>
   );
 }
