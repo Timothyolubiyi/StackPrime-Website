@@ -48,7 +48,7 @@ jobs:
         run: |
           doctl registries login "$REGISTRY_NS" --expiry-seconds 900
           IMAGE="registry.digitalocean.com/${REGISTRY_NS}/sp-saas-api"
-          docker build -t "${IMAGE}:${TAG}" stackprime-phase3/sp-saas-platform/sp-saas-platform/api
+          docker build -t "${IMAGE}:${TAG}" stackprime-phase3/sp-saas-platform/api
           docker push "${IMAGE}:${TAG}"
 
       - name: Configure SSH
